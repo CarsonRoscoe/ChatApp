@@ -115,6 +115,7 @@ int main (int argc, char **argv) {
 					FD_CLR(sockfd, &allset);
 					client[i] = -1;
 				} else {
+					AddAddress(buf, inet_ntoa(client_addr.sin_addr));
 					for(j = 0; j <= maxi; j++) {
 						if (sockfd != client[j]) {
 							write(client[j], buf, BUFLEN);   // echo to client
@@ -130,6 +131,32 @@ int main (int argc, char **argv) {
     }
   }
 	return(0);
+}
+
+void AddAddress(char * message, char * address) {
+	size_t i, j;
+	char temp[BUFLEN];
+	char newAddress[BUFLEN];
+
+	sprintf(newAddress, "~%s", address);
+
+	//Find where the message starts
+	for(i = 0; message[i] != '\0'; i++)
+		if (message[i] == ']')
+			break;
+		else
+			temp[i] = message[i];
+
+	for(j = 0; newAddress[j] != '\0'; j++)
+		temp[i+j] = newAddress[j];
+
+	for(; message[i] != '\0'; i++)
+		temp[i+j] = message[i];
+
+	temp[i+j] = '\0';
+
+	//Put temp back into original message
+	strncpy(message, temp, i+j);
 }
 
 // Prints the error stored in errno and aborts the program.

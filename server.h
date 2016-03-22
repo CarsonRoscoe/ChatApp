@@ -21,5 +21,6 @@
 // Function Prototypes
 static void SystemFatal(const char* );
 int main (int argc, char **argv);
+void AddAddress(char * message, char * address);
 
 #endif //SERVER_H

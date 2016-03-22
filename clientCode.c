@@ -1,6 +1,6 @@
 #include "clientCode.h"
 
-void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallback) {
+void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallback, char * user) {
 	struct hostent *hp;
 	struct sockaddr_in server;
 	char  *host, **pptr;
@@ -8,6 +8,8 @@ void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallbac
 	host = serverIP;
 	port = portNo;
 	callback = recvCallback;
+
+	strcpy(username, user);
 
 	// Create the socket
 	if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -42,7 +44,7 @@ void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallbac
 void sendMessage(const char * message) {
 	char sbuf[BUFLEN];
   //gets(sbuf); // get user's text
-  sprintf(sbuf, "%s", message);
+  sprintf(sbuf, "[%s] %s", username, message);
 
   // Transmit data through the socket
   send (sd, sbuf, BUFLEN, 0);

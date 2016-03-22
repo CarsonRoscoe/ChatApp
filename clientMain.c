@@ -7,9 +7,10 @@ int keepRunning;
 
 int main (int argc, char **argv)
 {
+	char * username = "Carson";
 	char message[BUFLEN];
 	keepRunning = 1;
-	connectToServer("127.0.0.1", 7000, receiveMessageCallback);
+	connectToServer("127.0.0.1", 7000, receiveMessageCallback, username);
 	while(keepRunning == 1) {
 		scanf("%s", message);
 		sendMessage(message);
