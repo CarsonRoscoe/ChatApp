@@ -2,12 +2,12 @@
 
 int main (int argc, char **argv) {
 	char * fail = "fail";
-	int i, j, maxi, nready, bytes_to_read, arg;
-	int listen_sd, new_sd, sockfd, client_len, port, maxfd, client[FD_SETSIZE];
-	struct sockaddr_in server, client_addr;
-	char *bp, buf[BUFLEN];
-  ssize_t n;
-  fd_set rset, allset;
+	int i, j, currentNewestClient, numReadibleDescriptors, bytesToRead, socketOptionSetting = 1;
+	int listeningSocketDescriptor, newSocketDescriptor, curClientSocket, clientLength, port, clientLatestSocket, client[FD_SETSIZE];
+	struct sockaddr_in server, clientAddress;
+	char *bufPointer, buf[BUFLEN];
+  ssize_t bytesRead;
+  fd_set curSet, allSet;
 
 	switch(argc) {
 		case 1:
@@ -22,12 +22,10 @@ int main (int argc, char **argv) {
 	}
 
 	// Create a stream socket
-	if ((listen_sd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+	if ((listeningSocketDescriptor = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		SystemFatal("Cannot Create Socket!");
 
-	// set SO_REUSEADDR so port can be resused imemediately after exit, i.e., after CTRL-c
-  arg = 1;
-  if (setsockopt (listen_sd, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg)) == -1)
+  if (setsockopt (listeningSocketDescriptor, SOL_SOCKET, SO_REUSEADDR, &socketOptionSetting, sizeof(socketOptionSetting)) == -1)
           SystemFatal("setsockopt");
 
 	// Bind an address to the socket
@@ -36,38 +34,38 @@ int main (int argc, char **argv) {
 	server.sin_port = htons(port);
 	server.sin_addr.s_addr = htonl(INADDR_ANY); // Accept connections from any client
 
-	if (bind(listen_sd, (struct sockaddr *)&server, sizeof(server)) == -1)
+	if (bind(listeningSocketDescriptor, (struct sockaddr *)&server, sizeof(server)) == -1)
 		SystemFatal("bind error");
 
 	// Listen for connections
 	// queue up to LISTENQ connect requests
-	listen(listen_sd, LISTENQ);
+	listen(listeningSocketDescriptor, LISTENQ);
 
-	maxfd	= listen_sd;	// initialize
-  maxi	= -1;		// index into client[] array
+	clientLatestSocket	= listeningSocketDescriptor;	// initialize
+  currentNewestClient	= -1;		// index into client[] array
 
 	for (i = 0; i < FD_SETSIZE; i++)
            	client[i] = -1;             // -1 indicates available entry
 
- 	FD_ZERO(&allset);
-  FD_SET(listen_sd, &allset);
+ 	FD_ZERO(&allSet);
+  FD_SET(listeningSocketDescriptor, &allSet);
 
 
 	while (TRUE) {
-   	rset = allset;               // structure assignment
-		nready = select(maxfd + 1, &rset, NULL, NULL, NULL);
+   	curSet = allSet;               // structure assignment
+		numReadibleDescriptors = select(clientLatestSocket + 1, &curSet, NULL, NULL, NULL);
 
-		if (FD_ISSET(listen_sd, &rset)) { //New client connection
-			client_len = sizeof(client_addr);
-			if ((new_sd = accept(listen_sd, (struct sockaddr *) &client_addr, &client_len)) == -1) {
+		if (FD_ISSET(listeningSocketDescriptor, &curSet)) { //New client connection
+			clientLength = sizeof(clientAddress);
+			if ((newSocketDescriptor = accept(listeningSocketDescriptor, (struct sockaddr *) &clientAddress, &clientLength)) == -1) {
 				SystemFatal("accept error");
 			}
 
-      printf("Remote Address:  %s\n", inet_ntoa(client_addr.sin_addr));
+      printf("Remote Address:  %s\n", inet_ntoa(clientAddress.sin_addr));
 
       for (i = 0; i < FD_SETSIZE; i++) {
 				if (client[i] < 0) {
-					client[i] = new_sd;	// save descriptor
+					client[i] = newSocketDescriptor;	// save descriptor
 					break;
         }
 			}
@@ -77,47 +75,47 @@ int main (int argc, char **argv) {
         exit(1);
 			}
 
-			FD_SET (new_sd, &allset);     // add new descriptor to set
-			if (new_sd > maxfd) {
-				maxfd = new_sd;	// for select
+			FD_SET (newSocketDescriptor, &allSet);     // add new descriptor to set
+			if (newSocketDescriptor > clientLatestSocket) {
+				clientLatestSocket = newSocketDescriptor;	// for select
 			}
 
-			if (i > maxi) {
-				maxi = i;	// new max index in client[] array
+			if (i > currentNewestClient) {
+				currentNewestClient = i;	// new max index in client[] array
 			}
 
-			if (--nready <= 0)
+			if (--numReadibleDescriptors <= 0)
 				continue;	// no more readable descriptors
 		}
 
-		for (i = 0; i <= maxi; i++)	{ //Check all clients for data
-			if ((sockfd = client[i]) < 0)
+		for (i = 0; i <= currentNewestClient; i++)	{ //Check all clients for data
+			if ((curClientSocket = client[i]) < 0)
 				continue;
-			if (FD_ISSET(sockfd, &rset)) {
-   			bp = buf;
-				bytes_to_read = BUFLEN;
-				while ((n = read(sockfd, bp, bytes_to_read)) > 0) {
-					bp += n;
-					bytes_to_read -= n;
+			if (FD_ISSET(curClientSocket, &curSet)) {
+   			bufPointer = buf;
+				bytesToRead = BUFLEN;
+				while ((bytesRead = read(curClientSocket, bufPointer, bytesToRead)) > 0) {
+					bufPointer += bytesRead;
+					bytesToRead -= bytesRead;
 				}
 
-				if (strlen(buf) == 0 && n == 0) {
-					printf("Remote Address:  %s closed connection\n", inet_ntoa(client_addr.sin_addr));
-					close(sockfd);
-					FD_CLR(sockfd, &allset);
+				if (strlen(buf) == 0 && bytesRead == 0) {
+					printf("Remote Address:  %s closed connection\n", inet_ntoa(clientAddress.sin_addr));
+					close(curClientSocket);
+					FD_CLR(curClientSocket, &allSet);
 					client[i] = -1;
 					continue;
 				}
 
 				if (strcmp(buf, fail) == 0) {
-					printf("Remote Address:  %s closed connection\n", inet_ntoa(client_addr.sin_addr));
-					close(sockfd);
-					FD_CLR(sockfd, &allset);
+					printf("Remote Address:  %s closed connection\n", inet_ntoa(clientAddress.sin_addr));
+					close(curClientSocket);
+					FD_CLR(curClientSocket, &allSet);
 					client[i] = -1;
 				} else {
-					AddAddress(buf, inet_ntoa(client_addr.sin_addr));
-					for(j = 0; j <= maxi; j++) {
-						if (sockfd != client[j]) {
+					AddAddress(buf, inet_ntoa(clientAddress.sin_addr));
+					for(j = 0; j <= currentNewestClient; j++) {
+						if (curClientSocket != client[j]) {
 							write(client[j], buf, BUFLEN);   // echo to client
 						}
 					}
@@ -125,7 +123,7 @@ int main (int argc, char **argv) {
 
 				buf[0] = '\0';
 
-				if (--nready <= 0)
+				if (--numReadibleDescriptors <= 0)
         	break;        // no more readable descriptors
 			}
     }
