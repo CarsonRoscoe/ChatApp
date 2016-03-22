@@ -101,6 +101,14 @@ int main (int argc, char **argv) {
 					bytes_to_read -= n;
 				}
 
+				if (strlen(buf) == 0 && n == 0) {
+					printf("Remote Address:  %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+					close(sockfd);
+					FD_CLR(sockfd, &allset);
+					client[i] = -1;
+					continue;
+				}
+
 				if (strcmp(buf, fail) == 0) {
 					printf("Remote Address:  %s closed connection\n", inet_ntoa(client_addr.sin_addr));
 					close(sockfd);
@@ -112,7 +120,6 @@ int main (int argc, char **argv) {
 							write(client[j], buf, BUFLEN);   // echo to client
 						}
 					}
-					printf("Message: %s\n", buf);
 				}
 
 				buf[0] = '\0';
