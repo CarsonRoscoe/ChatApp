@@ -50,6 +50,7 @@ int main (int argc, char **argv) {
  	FD_ZERO(&allSet);
   FD_SET(listeningSocketDescriptor, &allSet);
 
+	InitializeAddresses();
 
 	while (TRUE) {
    	curSet = allSet;               // structure assignment
@@ -61,8 +62,6 @@ int main (int argc, char **argv) {
 				SystemFatal("accept error");
 			}
 
-      printf("Remote Address:  %s\n", inet_ntoa(clientAddress.sin_addr));
-
       for (i = 0; i < FD_SETSIZE; i++) {
 				if (client[i] < 0) {
 					client[i] = newSocketDescriptor;	// save descriptor
@@ -73,7 +72,11 @@ int main (int argc, char **argv) {
 			if (i == FD_SETSIZE) {
 				printf ("Too many clients\n");
         exit(1);
+			} else {
+				strcpy(addresses[i], inet_ntoa(clientAddress.sin_addr));
 			}
+
+			Refresh();
 
 			FD_SET (newSocketDescriptor, &allSet);     // add new descriptor to set
 			if (newSocketDescriptor > clientLatestSocket) {
@@ -103,6 +106,8 @@ int main (int argc, char **argv) {
 					printf("Remote Address:  %s closed connection\n", inet_ntoa(clientAddress.sin_addr));
 					close(curClientSocket);
 					FD_CLR(curClientSocket, &allSet);
+					strcpy(addresses[i], "");
+					Refresh();
 					client[i] = -1;
 					continue;
 				}
@@ -111,6 +116,8 @@ int main (int argc, char **argv) {
 					printf("Remote Address:  %s closed connection\n", inet_ntoa(clientAddress.sin_addr));
 					close(curClientSocket);
 					FD_CLR(curClientSocket, &allSet);
+					strcpy(addresses[i], "");
+					Refresh();
 					client[i] = -1;
 				} else {
 					AddAddress(buf, inet_ntoa(clientAddress.sin_addr));
@@ -129,12 +136,6 @@ int main (int argc, char **argv) {
     }
   }
 	return(0);
-}
-
-void Refresh() {
-	//Clears the screen
-	printf("%c[2J",27);
-	
 }
 
 void AddAddress(char * message, char * address) {
@@ -163,8 +164,22 @@ void AddAddress(char * message, char * address) {
 	strncpy(message, temp, i+j);
 }
 
+void InitializeAddresses() {
+	size_t i;
+	for(i = 0; i < LISTENQ; i++)
+		strcpy(addresses[i], "");
+}
+
+void Refresh() {
+	size_t i;
+	printf("%s", CLEARSCREENANSI);
+	for(i = 0; i < LISTENQ; i++)
+		if (addresses[i][0] != '\0')
+			printf("%s\n", addresses[i]);
+}
+
 // Prints the error stored in errno and aborts the program.
 void SystemFatal(const char* errorMessage) {
-    perror (message);
+    perror (errorMessage);
     exit (EXIT_FAILURE);
 }
