@@ -19,7 +19,7 @@
 #define MAXLINE 4096
 
 // Function Prototypes
-static void SystemFatal(const char* );
+void SystemFatal(const char * errorMessage );
 int main (int argc, char **argv);
 void AddAddress(char * message, char * address);
 

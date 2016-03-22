@@ -131,6 +131,12 @@ int main (int argc, char **argv) {
 	return(0);
 }
 
+void Refresh() {
+	//Clears the screen
+	printf("%c[2J",27);
+	
+}
+
 void AddAddress(char * message, char * address) {
 	size_t i, j;
 	char temp[BUFLEN];
@@ -158,8 +164,7 @@ void AddAddress(char * message, char * address) {
 }
 
 // Prints the error stored in errno and aborts the program.
-static void SystemFatal(const char* message)
-{
+void SystemFatal(const char* errorMessage) {
     perror (message);
     exit (EXIT_FAILURE);
 }
