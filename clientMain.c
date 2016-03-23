@@ -12,7 +12,13 @@ int main (int argc, char **argv)
 	char * username = "Carson";
 	char message[BUFLEN];
 	keepRunning = 1;
-	connectToServer("127.0.0.1", 7000, receiveMessageCallback, receiveNewUserCallback, receiveUserLeftCallback, username, 5);
+
+	if (argc < 4) {
+		fprintf(stderr, "Usage: Server IP, Nickname and then icon #");
+		return 0;
+	}
+
+	connectToServer(argv[1], 7000, receiveMessageCallback, receiveNewUserCallback, receiveUserLeftCallback, argv[2], atoi(argv[3]));
 
 	while(keepRunning == 1) {
 		scanf("%s", message);

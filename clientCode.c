@@ -69,8 +69,6 @@ char * receiveMessage() {
 }
 
 void closeConnection() {
-	sendMessage("fail");
-	sleep(1);
 	pthread_cancel(thread);
 	close (sd);
 }

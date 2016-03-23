@@ -1,13 +1,14 @@
 #include "server.h"
 
 int main (int argc, char **argv) {
-	char * fail = "fail";
-	int i, j, currentNewestClient, numReadibleDescriptors, bytesToRead, socketOptionSetting = 1;
-	int listeningSocketDescriptor, newSocketDescriptor, curClientSocket, clientLength, port, clientLatestSocket, client[FD_SETSIZE];
+	int currentNewestClient, numReadibleDescriptors, bytesToRead, socketOptionSetting = 1;
+	int listeningSocketDescriptor, newSocketDescriptor, curClientSocket, port, clientLatestSocket, client[FD_SETSIZE];
 	struct sockaddr_in server, clientAddress;
 	char *bufPointer, buf[BUFLEN];
   ssize_t bytesRead;
   fd_set curSet, allSet;
+	size_t i, j;
+	socklen_t clientLength;
 
 	switch(argc) {
 		case 1:
