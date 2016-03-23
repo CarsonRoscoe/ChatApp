@@ -62,6 +62,12 @@ int main (int argc, char **argv) {
 				SystemFatal("accept error");
 			}
 
+			for(j = 0; j <= currentNewestClient; j++) {
+				char newbuf[BUFLEN];
+				sprintf(newbuf, "%c%s%c%s", NEWUSER, usernames[j], MESSAGEDELIMITER, addresses[j]);
+				write(newSocketDescriptor, newbuf, BUFLEN);   // echo to client
+			}
+
       for (i = 0; i < FD_SETSIZE; i++) {
 				if (client[i] < 0) {
 					client[i] = newSocketDescriptor;	// save descriptor
@@ -103,7 +109,8 @@ int main (int argc, char **argv) {
 				if (strlen(buf) == 0 && bytesRead == 0) {
 					char newbuf[BUFLEN];
 
-					sprintf(newbuf, "%c%s", USERLEFT, inet_ntoa(clientAddress.sin_addr));
+					sprintf(newbuf, "%c%s%c", USERLEFT, inet_ntoa(clientAddress.sin_addr));
+					//printf("%s", newbuf);
 
 					for(j = 0; j <= currentNewestClient; j++) {
 						if (curClientSocket != client[j]) {
@@ -119,24 +126,9 @@ int main (int argc, char **argv) {
 					continue;
 				}
 
-				if (strcmp(buf, fail) == 0) {
+				if (buf[0] == NEWUSER) {
 					char newbuf[BUFLEN];
-
-					sprintf(newbuf, "%c%s", USERLEFT, inet_ntoa(clientAddress.sin_addr));
-
-					for(j = 0; j <= currentNewestClient; j++) {
-						if (curClientSocket != client[j]) {
-							write(client[j], newbuf, BUFLEN);   // echo to client
-						}
-					}
-
-					close(curClientSocket);
-					FD_CLR(curClientSocket, &allSet);
-					ClearUser(i);
-					Refresh();
-					client[i] = -1;
-				} else if (buf[0] == NEWUSER) {
-					char newbuf[BUFLEN];
+					char token = MESSAGEDELIMITER;
 					sprintf(newbuf, "%s%c%s", buf, MESSAGEDELIMITER, inet_ntoa(clientAddress.sin_addr));
 					for(j = 0; j <= currentNewestClient; j++) {
 						if (curClientSocket != client[j]) {
@@ -144,7 +136,7 @@ int main (int argc, char **argv) {
 						}
 					}
 					memmove(buf, buf + 1, strlen(buf));
-					strcpy(usernames[i], buf);
+					strcpy(usernames[i], strtok(buf, &token));
 					Refresh();
 				} else {
 					char newbuf[BUFLEN];

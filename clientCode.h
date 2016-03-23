@@ -18,7 +18,7 @@
 //Socket variables
 char rbuf[BUFLEN];
 char username[USERNAMELEN];
-int port, sd;
+int port, sd, icon;
 
 //Thread variables
 pthread_t thread;
@@ -31,7 +31,7 @@ clientCodeCallback newUser;
 clientCodeCallback leftUser;
 
 //Function definitions
-void connectToServer(char * serverIP, int portNo, clientCodeCallback callback, clientCodeCallback newuserCallback, clientCodeCallback leftUser, char * username);
+void connectToServer(char * serverIP, int portNo, clientCodeCallback callback, clientCodeCallback newuserCallback, clientCodeCallback leftUser, char * username, int icon);
 void sendMessage();
 char * receiveMessage();
 void closeConnection();

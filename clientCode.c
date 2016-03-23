@@ -1,6 +1,6 @@
 #include "clientCode.h"
 
-void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallback, clientCodeCallback newClientCallback, clientCodeCallback leftClientCallback, char * user) {
+void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallback, clientCodeCallback newClientCallback, clientCodeCallback leftClientCallback, char * user, int ico) {
 	struct hostent *hp;
 	struct sockaddr_in server;
 	char  *host, **pptr;
@@ -12,6 +12,7 @@ void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallbac
 	leftUser = leftClientCallback;
 
 	strcpy(username, user);
+	icon = ico;
 
 	// Create the socket
 	if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -35,13 +36,10 @@ void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallbac
 		perror("connect");
 		exit(1);
 	}
-	printf("Connected:    Server Name: %s\n", hp->h_name);
-	pptr = hp->h_addr_list;
-	printf("\t\tIP Address: %s\n", inet_ntop(hp->h_addrtype, *pptr, str, sizeof(str)));
 
 	threadID = pthread_create(&thread, NULL, receiveThread, NULL);
 
-	sprintf(newuser, "%c%s", NEWUSER, user);
+	sprintf(newuser, "%c%s%c%lu", NEWUSER, user, MESSAGEDELIMITER, icon);
 
 	send (sd, newuser, BUFLEN, 0);
 }
@@ -49,7 +47,7 @@ void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallbac
 void sendMessage(const char * message) {
 	char sbuf[BUFLEN];
   //gets(sbuf); // get user's text
-  sprintf(sbuf, "%s%c%s", username, MESSAGEDELIMITER, message);
+  sprintf(sbuf, "%s%c%lu%c%s", username, MESSAGEDELIMITER, icon, MESSAGEDELIMITER, message);
 
   // Transmit data through the socket
   send (sd, sbuf, BUFLEN, 0);
@@ -85,10 +83,12 @@ void * receiveThread(void * ptr) {
 			switch(buf[0]) {
 				case NEWUSER:
 					memmove(newbuf, buf + 1, strlen(buf)-1);
+					newbuf[strlen(buf)-1] = '\0';
 					newUser(newbuf);
 					break;
 				case USERLEFT:
 					memmove(newbuf, buf + 1, strlen(buf)-1);
+					newbuf[strlen(buf)-1] = '\0';
 					leftUser(newbuf);
 					break;
 				default:
