@@ -31,7 +31,7 @@ clientCodeCallback newUser;
 clientCodeCallback leftUser;
 
 //Function definitions
-void connectToServer(char * serverIP, int portNo, clientCodeCallback callback, clientCodeCallback newuserCallback, clientCodeCallback leftUser, char * username, int icon);
+void connectToServer(char * serverIP, clientCodeCallback callback, clientCodeCallback newuserCallback, clientCodeCallback leftUser, char * username, int icon);
 void sendMessage();
 char * receiveMessage();
 void closeConnection();

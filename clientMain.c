@@ -1,3 +1,5 @@
+//Example usage of the clientCode.c "library". Tentative and will be replaced by a proper GUI application//
+
 #include "clientCode.h"
 #include <signal.h>
 
@@ -9,7 +11,6 @@ int keepRunning;
 
 int main (int argc, char **argv)
 {
-	char * username = "Carson";
 	char message[BUFLEN];
 	keepRunning = 1;
 
@@ -18,7 +19,7 @@ int main (int argc, char **argv)
 		return 0;
 	}
 
-	connectToServer(argv[1], 7000, receiveMessageCallback, receiveNewUserCallback, receiveUserLeftCallback, argv[2], atoi(argv[3]));
+	connectToServer(argv[1], receiveMessageCallback, receiveNewUserCallback, receiveUserLeftCallback, argv[2], atoi(argv[3]));
 
 	while(keepRunning == 1) {
 		scanf("%s", message);
