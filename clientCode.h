@@ -1,6 +1,7 @@
 #ifndef CLIENTCODE_H
 #define CLIENTCODE_H
 
+#include "shared.h"
 #include <stdio.h>
 #include <netdb.h>
 #include <sys/types.h>
@@ -14,10 +15,6 @@
 #include <unistd.h>
 #include <pthread.h>
 
-//Defines
-#define BUFLEN			255  	// Buffer length
-#define USERNAMELEN 16
-
 //Socket variables
 char rbuf[BUFLEN];
 char username[USERNAMELEN];
@@ -29,10 +26,12 @@ int threadID;
 
 //Callback declerations
 typedef void (*clientCodeCallback)(char * message);
-clientCodeCallback callback;
+clientCodeCallback recvMessage;
+clientCodeCallback newUser;
+clientCodeCallback leftUser;
 
 //Function definitions
-void connectToServer(char * serverIP, int portNo, clientCodeCallback callback, char * username);
+void connectToServer(char * serverIP, int portNo, clientCodeCallback callback, clientCodeCallback newuserCallback, clientCodeCallback leftUser, char * username);
 void sendMessage();
 char * receiveMessage();
 void closeConnection();

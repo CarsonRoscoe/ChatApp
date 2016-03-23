@@ -1,19 +1,20 @@
 #include "clientCode.h"
 
-void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallback, char * user) {
+void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallback, clientCodeCallback newClientCallback, clientCodeCallback leftClientCallback, char * user) {
 	struct hostent *hp;
 	struct sockaddr_in server;
 	char  *host, **pptr;
-	char str[16];
+	char str[16], newuser[USERNAMELEN+1];
 	host = serverIP;
 	port = portNo;
-	callback = recvCallback;
+	recvMessage = recvCallback;
+	newUser = newClientCallback;
+	leftUser = leftClientCallback;
 
 	strcpy(username, user);
 
 	// Create the socket
-	if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-	{
+	if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		perror("Cannot create socket");
 		exit(1);
 	}
@@ -39,12 +40,16 @@ void connectToServer(char * serverIP, int portNo, clientCodeCallback recvCallbac
 	printf("\t\tIP Address: %s\n", inet_ntop(hp->h_addrtype, *pptr, str, sizeof(str)));
 
 	threadID = pthread_create(&thread, NULL, receiveThread, NULL);
+
+	sprintf(newuser, "%c%s", NEWUSER, user);
+
+	send (sd, newuser, BUFLEN, 0);
 }
 
 void sendMessage(const char * message) {
 	char sbuf[BUFLEN];
   //gets(sbuf); // get user's text
-  sprintf(sbuf, "[%s] %s", username, message);
+  sprintf(sbuf, "%s%c%s", username, MESSAGEDELIMITER, message);
 
   // Transmit data through the socket
   send (sd, sbuf, BUFLEN, 0);
@@ -73,7 +78,23 @@ void closeConnection() {
 }
 
 void * receiveThread(void * ptr) {
+	char buf[BUFLEN], newbuf[BUFLEN];
 	while(1) {
-		callback(receiveMessage());
+		strcpy(buf, receiveMessage());
+		if (strlen(buf) > 1) {
+			switch(buf[0]) {
+				case NEWUSER:
+					memmove(newbuf, buf + 1, strlen(buf)-1);
+					newUser(newbuf);
+					break;
+				case USERLEFT:
+					memmove(newbuf, buf + 1, strlen(buf)-1);
+					leftUser(newbuf);
+					break;
+				default:
+					recvMessage(buf);
+					break;
+			}
+		}
 	}
 }

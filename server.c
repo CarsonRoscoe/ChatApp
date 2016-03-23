@@ -76,16 +76,14 @@ int main (int argc, char **argv) {
 				strcpy(addresses[i], inet_ntoa(clientAddress.sin_addr));
 			}
 
-			Refresh();
-
 			FD_SET (newSocketDescriptor, &allSet);     // add new descriptor to set
-			if (newSocketDescriptor > clientLatestSocket) {
+			if (newSocketDescriptor > clientLatestSocket)
 				clientLatestSocket = newSocketDescriptor;	// for select
-			}
 
-			if (i > currentNewestClient) {
+			if (i > currentNewestClient)
 				currentNewestClient = i;	// new max index in client[] array
-			}
+
+			Refresh();
 
 			if (--numReadibleDescriptors <= 0)
 				continue;	// no more readable descriptors
@@ -103,24 +101,55 @@ int main (int argc, char **argv) {
 				}
 
 				if (strlen(buf) == 0 && bytesRead == 0) {
-					printf("Remote Address:  %s closed connection\n", inet_ntoa(clientAddress.sin_addr));
+					char newbuf[BUFLEN];
+
+					sprintf(newbuf, "%c%s", USERLEFT, inet_ntoa(clientAddress.sin_addr));
+
+					for(j = 0; j <= currentNewestClient; j++) {
+						if (curClientSocket != client[j]) {
+							write(client[j], newbuf, BUFLEN);   // echo to client
+						}
+					}
+
 					close(curClientSocket);
 					FD_CLR(curClientSocket, &allSet);
-					strcpy(addresses[i], "");
+					ClearUser(i);
 					Refresh();
 					client[i] = -1;
 					continue;
 				}
 
 				if (strcmp(buf, fail) == 0) {
-					printf("Remote Address:  %s closed connection\n", inet_ntoa(clientAddress.sin_addr));
+					char newbuf[BUFLEN];
+
+					sprintf(newbuf, "%c%s", USERLEFT, inet_ntoa(clientAddress.sin_addr));
+
+					for(j = 0; j <= currentNewestClient; j++) {
+						if (curClientSocket != client[j]) {
+							write(client[j], newbuf, BUFLEN);   // echo to client
+						}
+					}
+
 					close(curClientSocket);
 					FD_CLR(curClientSocket, &allSet);
-					strcpy(addresses[i], "");
+					ClearUser(i);
 					Refresh();
 					client[i] = -1;
+				} else if (buf[0] == NEWUSER) {
+					char newbuf[BUFLEN];
+					sprintf(newbuf, "%s%c%s", buf, MESSAGEDELIMITER, inet_ntoa(clientAddress.sin_addr));
+					for(j = 0; j <= currentNewestClient; j++) {
+						if (curClientSocket != client[j]) {
+							write(client[j], newbuf, BUFLEN);   // echo to client
+						}
+					}
+					memmove(buf, buf + 1, strlen(buf));
+					strcpy(usernames[i], buf);
+					Refresh();
 				} else {
-					AddAddress(buf, inet_ntoa(clientAddress.sin_addr));
+					char newbuf[BUFLEN];
+					sprintf(newbuf, "%s%c%s", inet_ntoa(clientAddress.sin_addr), MESSAGEDELIMITER, buf);
+					sprintf(buf, newbuf);
 					for(j = 0; j <= currentNewestClient; j++) {
 						if (curClientSocket != client[j]) {
 							write(client[j], buf, BUFLEN);   // echo to client
@@ -175,7 +204,12 @@ void Refresh() {
 	printf("%s", CLEARSCREENANSI);
 	for(i = 0; i < LISTENQ; i++)
 		if (addresses[i][0] != '\0')
-			printf("%s\n", addresses[i]);
+			printf("Address: %s - Nickname: %s\n", addresses[i], usernames[i]);
+}
+
+void ClearUser(size_t index) {
+	strcpy(addresses[index], "");
+	strcpy(usernames[index], "");
 }
 
 // Prints the error stored in errno and aborts the program.
