@@ -16,6 +16,7 @@ void recvUserLeft(char * newmessage);
 void recvNewUser(char * newmessage);
 void connectToServerWrapper(char * serverIP, clientCodeCallback recvCallback, clientCodeCallback newClientCallback, clientCodeCallback leftClientCallback, char * user, int ico);
 void sendMessageWrapper(char * message);
+void disconnectButtonClicked();
 
 extern void * app;
 
