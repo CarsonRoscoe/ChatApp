@@ -64,9 +64,7 @@ int main(int argc, char *argv[])
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     app.setWindowIcon(QIcon(":/images/misc/logonotext.ico"));
 
-    std::string file("text.txt");
-    AppController appcontext(&engine, file.c_str());
-    //AppController appcontext(&engine, argc == 2 ? argv[1] : NULL);
+    AppController appcontext(&engine, argc == 2 ? argv[1] : NULL);
 
     return app.exec();
 }
