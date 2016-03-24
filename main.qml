@@ -320,63 +320,9 @@ Window {
             /*MouseArea {
                 anchors.fill: parent
             }*/
-            Tab {
-               id: userTab
-               title: "Users"
-               Rectangle {
-                   radius: 10
-                   color: "#00a9a2"
-                   Rectangle {
-                       id: usersContainer
-                       anchors.top: parent.top
-                       anchors.topMargin: 30
-                       anchors.left: parent.left
-                       anchors.leftMargin: 20
-                       width: 160
-                       height: 430
-                       color: "#ffffff"
-                       radius: 1
-                       Flickable {
-                           id: userListScrollFix
-                           width: 432
-                           height: 32
-                           anchors.left: parent.left
-                           anchors.leftMargin: 5
-                           anchors.top: parent.top
-                           anchors.topMargin: 5
-                           contentWidth: userListEdit.width
-                           contentHeight: userListEdit.height
-                           clip: true
-
-                           function ensureVisible(r)
-                           {
-                               if (contentX >= r.x)
-                                   contentX = r.x;
-                               else if (contentX+width <= r.x+r.width)
-                                   contentX = r.x+r.width-width;
-                               if (contentY >= r.y)
-                                   contentY = r.y;
-                               else if (contentY+height <= r.y+r.height)
-                                   contentY = r.y+r.height-height;
-                           }
-
-                           TextEdit {
-                               id: userListEdit
-                               width: userListScrollFix.width
-                               height: userListScrollFix.height
-                               text: gApplicationController.usersOnline
-                               font.family: "Arial"
-                               cursorVisible: false
-                               wrapMode: TextEdit.Wrap
-                               font.pixelSize: 12
-                               onCursorRectangleChanged: userListScrollFix.ensureVisible(cursorRectangle)
-                           }
-                       }
-                   }
-               }
-           }
            Tab {
                id: configTab
+               active: true
                title: "Configuration"
                Rectangle {
                    radius: 10

@@ -245,7 +245,7 @@ void AppController::updateUsers(QString s) {
     usersOnline = "";
     std::map<QString,QString>::iterator it;
     for (it=users.begin(); it!=users.end(); ++it)
-        usersOnline += "[" + it->first + "]<br>" + it->second + "<br><br>";
+        usersOnline += "[" + it->first + "] <b>" + it->second + "</b><br>";
     usersOnlineChanged(usersOnline);
 }
 
