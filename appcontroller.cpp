@@ -35,6 +35,7 @@
 #include <QQmlComponent>
 #include <QQmlProperty>
 #include <QQuickItem>
+#include <sstream>
 #include "appcontroller.h"
 
 //Implementation of a extern used to hold the pointer to our window
@@ -122,7 +123,10 @@ void AppController::sendButtonClicked(const QString &message) {
     if (message == "")
         return;
     sendMessage(message.toLatin1().data());
-    gotNewMessage("0", username, "" + icon, message);
+    std::ostringstream convert;
+    convert << icon;
+    QString Result = QString::fromStdString(convert.str());
+    gotNewMessage("Myself", username, Result, message);
 }
 
 /*------------------------------------------------------------------------------------------------------------------
