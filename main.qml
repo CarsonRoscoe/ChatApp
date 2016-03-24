@@ -543,8 +543,38 @@ Window {
                        }
 
                        onClicked : {
-
                             gApplicationController.connectButtonClicked(nickText.text, avatarNum.value, ipText.text)
+                           buttonConnect.enabled = false
+                           buttonDisconnect.enabled = true
+                       }
+                   }
+                   Button {
+                       id: buttonDisconnect
+                       text: qsTr("Connect")
+                       anchors.top: buttonConnect.top
+                       anchors.topMargin: 50
+                       anchors.left: parent.left
+                       anchors.leftMargin: 30
+                       enabled: false
+                       property color color0: "#777"
+                       property color color1: "#bbb"
+                       style: ButtonStyle {
+                           background: Rectangle {
+                               implicitWidth: 100
+                               implicitHeight: 25
+                               border.width: control.activeFocus ? 2 : 1
+                               border.color: "#888"
+                               radius: 4
+                               gradient: Gradient {
+                                   GradientStop { position: 0 ; color: control.pressed ? "#00a9a2" : buttonConnect.color0 }
+                                   GradientStop { position: 1 ; color: control.pressed ? "#8ffdf9" : buttonConnect.color1 }
+                               }
+                           }
+                       }
+                       onClicked : {
+                            //gApplicationController.disconnect()
+                           buttonDisconnect.enabled = false
+                           buttonConnect.enabled = true
                        }
                    }
                }
