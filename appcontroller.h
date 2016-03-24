@@ -6,6 +6,7 @@
 #include <QQmlContext>
 #include <QCursor>
 #include <map>
+#include <fstream>
 #include "clientqtwrappers.h"
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -45,9 +46,15 @@ class AppController : public QObject
 
 public:
     //Constructor which takes in the ApplicationEngine and assigns AppController to be the application controller of the engine
-    AppController(QQmlApplicationEngine *engine)
+    AppController(QQmlApplicationEngine *engine, const char * fileName = NULL)
     {
         engine->rootContext()->setContextProperty("gApplicationController", this);
+        if (fileName != NULL) {
+            outfile.open(fileName, std::ofstream::out | std::ofstream::app);
+            toFile = true;
+        } else {
+            toFile = false;
+        }
     }
     //Returns the current cursor positions
     Q_INVOKABLE QVariant getCursorPos();
@@ -77,6 +84,10 @@ private:
     QString output;
     //Map of all clients connected where the key is their IP address and the value is their nickname
     std::map<QString, QString> users;
+    //File stream
+    std::ofstream outfile;
+    //Read to file or not
+    bool toFile;
 };
 
 #endif // APPCONTROLLER_H

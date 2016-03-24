@@ -148,8 +148,13 @@ void AppController::sendButtonClicked(const QString &message) {
 void AppController::gotNewMessage(const QString &ip, const QString &nickname, const QString &icon, const QString &message) {
     QString text = "[" + nickname + "] " + message + "<br>";
     qDebug() << "[MESSAGE] IP: " << ip << ", Nickname: " << nickname << ", Icon: " << icon << ", Message: " << message;
+    if (toFile) {
+        std::time_t result = std::time(nullptr);
+        std::string time = std::asctime(std::localtime(&result));
+        time.pop_back();
+        outfile << "[" << nickname.toStdString().c_str() << "/" << ip.toStdString().c_str() << " @ " << time << "] " << message.toStdString().c_str() << "\n";
+    }
     //Someone said a new message.
-    //SetText here
     setText(text);
 }
 

@@ -105,7 +105,7 @@ void connectToServer(char * serverIP, clientCodeCallback recvCallback, clientCod
     // Create the socket
     if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("Cannot create socket");
-        exit(1);
+        return;
     }
 
     bzero((char *)&server, sizeof(struct sockaddr_in));
@@ -115,7 +115,7 @@ void connectToServer(char * serverIP, clientCodeCallback recvCallback, clientCod
     //Get the server address
     if ((hp = gethostbyname(host)) == NULL) {
         fprintf(stderr, "Unknown server address\n");
-        exit(1);
+        return;
     }
 
     bcopy(hp->h_addr, (char *)&server.sin_addr, hp->h_length);
@@ -124,7 +124,7 @@ void connectToServer(char * serverIP, clientCodeCallback recvCallback, clientCod
     if (connect (sd, (struct sockaddr *)&server, sizeof(server)) == -1) {
         fprintf(stderr, "Can't connect to server\n");
         perror("connect");
-        exit(1);
+        return;
     }
 
     //Create our read thread that will read data on the socket
