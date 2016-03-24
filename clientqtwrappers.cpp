@@ -60,19 +60,19 @@ clientCodeCallback leftUser;
 -- DATE: March 20th, 2016
 --
 -- REVISIONS: March 20th, 2016: Created
---			  March 22nd, 2016: Added more functionality
---			  March 23rd, 2016: Commented
+--            March 22nd, 2016: Added more functionality
+--            March 23rd, 2016: Commented
 --
 -- DESIGNER: Carson Roscoe
 --
 -- PROGRAMMER: Carson Roscoe
 --
 -- INTERFACE: void connectToServer(Server's IP address
---			  Callback that is invoked when another user sends a message
---			  Callback that is invoked when someone new joins the chatroom
---			  Callback that is invoked when someone left the chatroom
---		      Username we want displayed to other users
---			  The index value of the icon we want displayed to other users)
+--			                           Callback that is invoked when another user sends a message
+--			                           Callback that is invoked when someone new joins the chatroom
+--			                           Callback that is invoked when someone left the chatroom
+--		                             Username we want displayed to other users
+--			                           The index value of the icon we want displayed to other users)
 --
 -- RETURN: void
 --
@@ -367,6 +367,8 @@ void recvNewUser(char * newpacket) {
     QStringList packet = QString::fromUtf8(newpacket).split(MESSAGEDELIMITER);
     if (packet.length() < 3) {
         qDebug() << "Error in recv";
+        for(size_t i; i < packet.length(); i++)
+            qDebug() << packet.at(i);
         return;
     }
 
