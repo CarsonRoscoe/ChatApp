@@ -5,18 +5,24 @@
 #include <QObject>
 #include <QQmlContext>
 #include <QCursor>
+#include <QDebug>
 #include "clientqtwrappers.h"
 
 
 class AppController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString newText READ getText WRITE setText NOTIFY textChanged)
+    Q_PROPERTY(QStringList model READ getText WRITE setText NOTIFY textChanged)
+
+    QQmlApplicationEngine *m_engine;
 
 public:
     AppController(QQmlApplicationEngine *engine)
     {
+        qDebug() << "initialized";
         engine->rootContext()->setContextProperty("gApplicationController", this);
+        m_engine = engine;
+
     }
     Q_INVOKABLE QVariant getCursorPos();
 
@@ -31,7 +37,8 @@ public slots:
 signals:
     void textChanged(QString);
 private:
-    QString output;
+    QStringList model;
+    int numMsg;
 };
 
 

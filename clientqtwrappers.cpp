@@ -315,7 +315,3 @@ void connectToServerWrapper(char * serverIP, clientCodeCallback recvCallback, cl
 void sendMessageWrapper(char * message) {
     sendMessage(message);
 }
-
-void disconnectButtonClicked() {
-    closeConnection();
-}

@@ -1,6 +1,9 @@
 #include <QDebug>
 #include <QString>
 #include <QObject>
+#include <QQmlComponent>
+#include <QQmlProperty>
+#include <QQuickItem>
 #include "appcontroller.h"
 
 void * app;
@@ -45,8 +48,18 @@ void AppController::gotLostUser(const QString &ip) {
 }
 
 void AppController::setText(QString text) {
-    output += text;
-    emit textChanged(output);
+
+    ushort code = 17;
+    QChar *dc1 = new QChar(code);
+    QRegExp rx(*dc1);
+    QStringList components = text.split(rx);
+
+    model.append(components.at(0));
+    model.append(components.at(1));
+    model.append(QString::number(components.at(2)));
+    model.append(components.at(3));
+
+    textChanged(model);
 }
 
 QString AppController::getText() const {

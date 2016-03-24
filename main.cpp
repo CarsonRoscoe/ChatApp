@@ -11,42 +11,19 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     app.setWindowIcon(QIcon(":/images/misc/logonotext.ico"));
-
     AppController appcontext(&engine);
+
+    ushort code = 17;
+    QChar *dc1 = new QChar(code);
+    QString message;
+    message += "127.0.12.123";
+    message += *dc1;
+    message += "testuser1";
+    message += *dc1;
+    message += QString::number(5);
+    message += *dc1;
+    message += "This is a wicked-cool awesome message!!";
+    appcontext.setText(message);
 
     return app.exec();
 }
-
-/* Format for reply in "chatDisplayText"
-
-Other people:
-
-<div>
-<div>
-<image src="http://icons.iconarchive.com/icons/mattahan/ultrabuuf/128/Street-Fighter-Sakura-Kasugano-icon.png" style="float: left; margin-left: 10px; margin-top: -10px;" width=70 height=70/>
-</div>
-<div style="background-color: Turquoise; width: 410px; margin-left: 100px; margin-top: 20px; margin-bottom: 20px; border-radius: 10px; padding: 1px 15px;">
-<p>
-Test message content
-</p>
-</div>
-
-You:
-
-<div>
-<image src="http://icons.iconarchive.com/icons/mattahan/ultrabuuf/128/Spaceship-Cylon-icon.png" style="float: right; margin-right: 10px; margin-top: -10px;" width=70 height=70/>
-</div>
-<div style="background-color: PaleTurquoise; width: 410px; margin-left: 20px; margin-top: 20px; margin-bottom: 20px; border-radius: 10px; padding: 1px 15px;">
-<p>
-Test message reply
-</p>
-</div>
-</div>
-
-QString *output = new QString("<div><div><image src=\"0.png\" style=\"float: left; margin-left: 10px;"
-                             " margin-top: -10px;\" width=70 height=70/></div><div style=\"background-color:"
-                             " Turquoise; width: 410px; margin-left: 100px; margin-top: 20px; margin-bottom:"
-                             " 20px; border-radius: 10px; padding: 1px 15px;\"><p>Test message content</p>"
-                             "</div>");
-
-*/

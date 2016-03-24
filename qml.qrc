@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>MessageIncoming.qml</file>
+        <file>MessageIncomingData.qml</file>
     </qresource>
     <qresource prefix="/images/misc">
         <file alias="logo.ico">images/misc/logo.ico</file>

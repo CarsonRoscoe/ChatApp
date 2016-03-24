@@ -62,84 +62,13 @@ Window {
         }
 
         Image {
-            source:"images/window_controls/blue/maximize.png"
-            id: maximize
-            x: 535
-            width: 16
-            height: 16
-            z: 3
-            anchors.right: close.left
-            anchors.rightMargin: 1
-            anchors.top: parent.top
-            anchors.topMargin: 8
-            fillMode: Image.PreserveAspectCrop
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    restore.visible = true
-                    maximize.visible = false
-                    mainWindow.showMaximized();
-                }
-            }
-        }
-
-        Rectangle {
-            id: maximizeBackFill
-            x: 578
-            width: 14
-            height: 14
-            z: 2
-            color: "#fff"
-            anchors.rightMargin: 1
-            anchors.topMargin: 1
-            anchors.top: maximize.top
-            anchors.right: maximize.right
-        }
-
-        Image {
-            source:"images/window_controls/blue/restore.png"
-            id: restore
-            x: 535
-            width: 16
-            height: 16
-            z: 3
-            anchors.right: close.left
-            anchors.rightMargin: 1
-            anchors.top: parent.top
-            anchors.topMargin: 8
-            fillMode: Image.PreserveAspectCrop
-            visible: false
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    restore.visible = false
-                    maximize.visible = true
-                    mainWindow.showNormal();
-                }
-            }
-        }
-
-        Rectangle {
-            id: restoreBackFill
-            x: 578
-            width: 14
-            height: 14
-            z: 2
-            color: "#fff"
-            anchors.rightMargin: 1
-            anchors.topMargin: 1
-            anchors.top: restore.top
-            anchors.right: restore.right
-        }
-
-        Image {
             source:"images/window_controls/blue/minimize.png"
             id: minimize
             x: 518
             width: 16
             height: 16
             z: 3
-            anchors.right: maximize.left
+            anchors.right: close.left
             anchors.rightMargin: 1
             anchors.top: parent.top
             anchors.topMargin: 8
@@ -262,13 +191,26 @@ Window {
                 height: 349
                 color: "#ffffff"
                 radius: 1
-                TextEdit {
+                TextArea {
                     id: chatDisplayText
                     textFormat: Text.RichText
                     readOnly: true
                     font.family: "Arial"
                     anchors.fill: parent
-                    text: gApplicationController.newText
+                    clip: true
+                    font.pointSize: 5
+                    style: TextAreaStyle {
+                        textColor: "#333"
+                        selectionColor: "steelblue"
+                        selectedTextColor: "#eee"
+                        backgroundColor: "#eee"
+                    }
+                    ListView {
+                        id: messageList
+                        anchors.fill: parent
+                        delegate: MessageIncoming {}
+                        model: MessageIncomingData {}
+                    }
                 }
             }
 
@@ -543,14 +485,23 @@ Window {
                        }
 
                        onClicked : {
-                            gApplicationController.connectButtonClicked(nickText.text, avatarNum.value, ipText.text)
+                           gApplicationController.connectButtonClicked(nickText.text, avatarNum.value, ipText.text)
+                           buttonConnect.color0 = "#777"
+                           buttonConnect.color1 = "#bbb"
+                           buttonDisconnect.color0 = "#8ffdf9"
+                           buttonDisconnect.color1 = "#00a9a2"
                            buttonConnect.enabled = false
+                           ipText.enabled = false
+                           ipText.text = ""
+                           avatarNum.enabled = false
+                           nickText.enabled = false
+                           nickText.text = ""
                            buttonDisconnect.enabled = true
                        }
                    }
                    Button {
                        id: buttonDisconnect
-                       text: qsTr("Connect")
+                       text: qsTr("Disconnect")
                        anchors.top: buttonConnect.top
                        anchors.topMargin: 50
                        anchors.left: parent.left
@@ -566,15 +517,21 @@ Window {
                                border.color: "#888"
                                radius: 4
                                gradient: Gradient {
-                                   GradientStop { position: 0 ; color: control.pressed ? "#00a9a2" : buttonConnect.color0 }
-                                   GradientStop { position: 1 ; color: control.pressed ? "#8ffdf9" : buttonConnect.color1 }
+                                   GradientStop { position: 0 ; color: control.pressed ? "#00a9a2" : buttonDisconnect.color0 }
+                                   GradientStop { position: 1 ; color: control.pressed ? "#8ffdf9" : buttonDisconnect.color1 }
                                }
                            }
                        }
                        onClicked : {
-                            //gApplicationController.disconnect()
+                           //gApplicationController.disconnect()
+                           buttonDisconnect.color0 = "#777"
+                           buttonDisconnect.color1 = "#bbb"
+                           buttonConnect.color0 = "#8ffdf9"
+                           buttonConnect.color1 = "#00a9a2"
                            buttonDisconnect.enabled = false
-                           buttonConnect.enabled = true
+                           ipText.enabled = true
+                           avatarNum.enabled = true
+                           nickText.enabled = true
                        }
                    }
                }
