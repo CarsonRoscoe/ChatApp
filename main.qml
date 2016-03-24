@@ -19,7 +19,7 @@ Window {
         gradient: Gradient {
             GradientStop {
                 position: 0
-                color: "#c1fef7"
+                color: "#8ffdf9"
             }
 
             GradientStop {
@@ -262,11 +262,13 @@ Window {
                 height: 349
                 color: "#ffffff"
                 radius: 1
-                TextArea {
+                TextEdit {
                     id: chatDisplayText
-                    tabChangesFocus: true
+                    textFormat: Text.RichText
+                    readOnly: true
                     font.family: "Arial"
                     anchors.fill: parent
+                    text: gApplicationController.newText
                 }
             }
 
@@ -311,7 +313,7 @@ Window {
                         height: chatReplyScrollFix.height
                         text: qsTr("")
                         font.family: "Arial"
-                        cursorVisible: true
+                        cursorVisible: false
                         wrapMode: TextEdit.Wrap
                         font.pixelSize: 12
                         onCursorRectangleChanged: chatReplyScrollFix.ensureVisible(cursorRectangle)
@@ -329,7 +331,6 @@ Window {
                 anchors.leftMargin: 17
                 anchors.top: chatDisplayContainer.bottom
                 anchors.topMargin: 26
-
                 MouseArea {
                     anchors.fill: parent
                     onPressed: {
@@ -402,7 +403,7 @@ Window {
                    TextField {
                        id: nickText
                        width: 150
-                       height: 20
+                       height: 28
                        anchors.top: nickLabel.top
                        anchors.topMargin: 30
                        anchors.left: parent.left
@@ -414,6 +415,17 @@ Window {
                                implicitWidth: nickText.width
                                implicitHeight: nickText.height
                                border.width: 0
+                           }
+                       }
+                       onTextChanged: {
+                           if (nickText.text != "") {
+                               buttonConnect.nick = true
+                               buttonConnect.checkCompletion()
+                           } else {
+                               buttonConnect.nick = false
+                               buttonConnect.enabled = false
+                               buttonConnect.color0 = "#777"
+                               buttonConnect.color1 = "#bbb"
                            }
                        }
                    }
@@ -438,8 +450,8 @@ Window {
 
                    SpinBox {
                        id: avatarNum
-                       width: 40
-                       height: 20
+                       width: 50
+                       height: 28
                        anchors.top: avatarLabel.top
                        anchors.topMargin: 30
                        anchors.left: parent.left
@@ -469,7 +481,7 @@ Window {
                    TextField {
                        id: ipText
                        width: 150
-                       height: 20
+                       height: 28
                        anchors.top: ipLabel.top
                        anchors.topMargin: 30
                        anchors.left: parent.left
@@ -484,6 +496,17 @@ Window {
                                border.width: 0
                            }
                        }
+                       onTextChanged: {
+                           if (ipText.text != "") {
+                               buttonConnect.ip = true
+                               buttonConnect.checkCompletion()
+                           } else {
+                               buttonConnect.ip = false
+                               buttonConnect.enabled = false
+                               buttonConnect.color0 = "#777"
+                               buttonConnect.color1 = "#bbb"
+                           }
+                       }
                    }
 
                    Button {
@@ -493,6 +516,9 @@ Window {
                        anchors.topMargin: 50
                        anchors.left: parent.left
                        anchors.leftMargin: 30
+                       enabled: false
+                       property color color0: "#777"
+                       property color color1: "#bbb"
                        style: ButtonStyle {
                            background: Rectangle {
                                implicitWidth: 100
@@ -501,12 +527,23 @@ Window {
                                border.color: "#888"
                                radius: 4
                                gradient: Gradient {
-                                   GradientStop { position: 0 ; color: control.pressed ? "#ccc" : "#eee" }
-                                   GradientStop { position: 1 ; color: control.pressed ? "#aaa" : "#ccc" }
+                                   GradientStop { position: 0 ; color: control.pressed ? "#00a9a2" : buttonConnect.color0 }
+                                   GradientStop { position: 1 ; color: control.pressed ? "#8ffdf9" : buttonConnect.color1 }
                                }
                            }
                        }
+                       property bool nick: false
+                       property bool ip: false
+                       function checkCompletion() {
+                           if (nick & ip) {
+                               buttonConnect.enabled = true
+                               buttonConnect.color0 = "#8ffdf9"
+                               buttonConnect.color1 = "#00a9a2"
+                           }
+                       }
+
                        onClicked : {
+
                             gApplicationController.connectButtonClicked(nickText.text, avatarNum.value, ipText.text)
                        }
                    }

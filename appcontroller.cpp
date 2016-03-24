@@ -1,4 +1,6 @@
 #include <QDebug>
+#include <QString>
+#include <QObject>
 #include "appcontroller.h"
 
 void * app;
@@ -40,4 +42,13 @@ void AppController::gotNewUser(const QString &ip, const QString &nickname, const
 void AppController::gotLostUser(const QString &ip) {
     qDebug() << "[USERLEFT] IP: " << ip;
     //User disconnected
+}
+
+void AppController::setText(QString text) {
+    output += text;
+    emit textChanged(output);
+}
+
+QString AppController::getText() const {
+    return output;
 }
