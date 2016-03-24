@@ -233,6 +233,10 @@ void AppController::gotLostUser(const QString &ip) {
 -- Updates the UI of users after a user has been added or removed from our list of connected clients
 ----------------------------------------------------------------------------------------------------------------------*/
 void AppController::updateUsers() {
+    //TODO: make it so when iterating through the list, qDebug() line is replaced with the "current online users" list.
+    //Basically,
+    //foreach user connected
+    //    append it to the UI
     std::map<QString,QString>::iterator it;
     for (it=users.begin(); it!=users.end(); ++it)
         qDebug() << it->first << " => " << it->second;
