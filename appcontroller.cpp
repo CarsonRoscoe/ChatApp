@@ -27,7 +27,7 @@ void AppController::sendButtonClicked(const QString &message) {
 }
 
 void AppController::gotNewMessage(const QString &ip, const QString &nickname, const QString &icon, const QString &message) {
-    QString text = "[" << nickname << "] " << message;
+    QString text = "[" + nickname + "] " + message + "\n";
     qDebug() << "[MESSAGE] IP: " << ip << ", Nickname: " << nickname << ", Icon: " << icon << ", Message: " << message;
     //Someone said a new message.
     //SetText here
