@@ -67,7 +67,7 @@ int main (int argc, char **argv) {
 	//Holds the different checks needed for select
   fd_set curSet, allSet;
 	//Temporary variables used when iterating through for loops
-	size_t i, j;
+	int i, j;
 	//Client socket length
 	socklen_t clientLength;
 
@@ -124,12 +124,15 @@ int main (int argc, char **argv) {
 	//Set all our storage of addresses and usernames to be empty
 	InitializeAddresses();
 
+	printf("Starting Server\n");
+
 	//Begin our forever loop listening for connections & data
 	while (1) {
    	curSet = allSet;
 		numReadibleDescriptors = select(clientLatestSocket + 1, &curSet, NULL, NULL, NULL);
 
 		if (FD_ISSET(listeningSocketDescriptor, &curSet)) { //New client connection
+			printf("New client\n");
 			clientLength = sizeof(clientAddress);
 			if ((newSocketDescriptor = accept(listeningSocketDescriptor, (struct sockaddr *) &clientAddress, &clientLength)) == -1) {
 				CriticalError("accept error");
@@ -140,6 +143,8 @@ int main (int argc, char **argv) {
 				sprintf(newbuf, "%c%s%c%s", NEWUSER, usernames[j], MESSAGEDELIMITER, addresses[j]);
 				write(newSocketDescriptor, newbuf, BUFLEN);   // echo to client
 			}
+
+
 
       for (i = 0; i < FD_SETSIZE; i++) {
 				if (client[i] < 0) {
@@ -236,6 +241,7 @@ void InitializeAddresses() {
 	size_t i;
 	for(i = 0; i < MAXCLIENTS; i++)
 		strcpy(addresses[i], "");
+	printf("Initialized Addresses\n");
 }
 
 void Refresh() {
@@ -244,11 +250,13 @@ void Refresh() {
 	for(i = 0; i < MAXCLIENTS; i++)
 		if (addresses[i][0] != '\0')
 			printf("Address: %s - Nickname: %s\n", addresses[i], usernames[i]);
+	printf("Refreshed Screen\n");
 }
 
 void ClearUser(size_t index) {
 	strcpy(addresses[index], "");
 	strcpy(usernames[index], "");
+	printf("Clear Users\n");
 }
 
 // Prints the error stored in errno and aborts the program.

@@ -33,7 +33,21 @@
 -- send is delimited by a DC1 flag.
 ----------------------------------------------------------------------------------------------------------------------*/
 
-#include "clientCode.h"
+#include "clientqtwrappers.h"
+
+//Socket variables
+char rbuf[BUFLEN];
+char username[USERNAMELEN];
+int port, sd, icon;
+
+//Thread variables
+pthread_t thread;
+int threadID;
+
+//Callback declerations
+clientCodeCallback recvMessage;
+clientCodeCallback newUser;
+clientCodeCallback leftUser;
 
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: connectToServer
@@ -68,52 +82,52 @@
 -- thread that will read continously and invoke the callbacks listed when appropriate.
 ----------------------------------------------------------------------------------------------------------------------*/
 void connectToServer(char * serverIP, clientCodeCallback recvCallback, clientCodeCallback newClientCallback, clientCodeCallback leftClientCallback, char * user, int ico) {
-	struct hostent *hp;
-	struct sockaddr_in server;
-	char  *host, **pptr;
-	char str[16], newuser[USERNAMELEN+1];
+    struct hostent *hp;
+    struct sockaddr_in server;
+    char  *host, **pptr;
+    char str[16], newuser[USERNAMELEN+1];
 
-	//Set our connection data & callbacks
-	host = serverIP;
-	port = PORTNO;
-	recvMessage = recvCallback;
-	newUser = newClientCallback;
-	leftUser = leftClientCallback;
-	icon = ico;
-	strcpy(username, user);
+    //Set our connection data & callbacks
+    host = serverIP;
+    port = PORTNO;
+    recvMessage = recvCallback;
+    newUser = newClientCallback;
+    leftUser = leftClientCallback;
+    icon = ico;
+    strcpy(username, user);
 
 
-	// Create the socket
-	if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		perror("Cannot create socket");
-		exit(1);
-	}
+    // Create the socket
+    if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        perror("Cannot create socket");
+        exit(1);
+    }
 
-	bzero((char *)&server, sizeof(struct sockaddr_in));
-	server.sin_family = AF_INET;
-	server.sin_port = htons(port);
+    bzero((char *)&server, sizeof(struct sockaddr_in));
+    server.sin_family = AF_INET;
+    server.sin_port = htons(port);
 
-	//Get the server address
-	if ((hp = gethostbyname(host)) == NULL) {
-		fprintf(stderr, "Unknown server address\n");
-		exit(1);
-	}
+    //Get the server address
+    if ((hp = gethostbyname(host)) == NULL) {
+        fprintf(stderr, "Unknown server address\n");
+        exit(1);
+    }
 
-	bcopy(hp->h_addr, (char *)&server.sin_addr, hp->h_length);
+    bcopy(hp->h_addr, (char *)&server.sin_addr, hp->h_length);
 
-	//Connect to the server
-	if (connect (sd, (struct sockaddr *)&server, sizeof(server)) == -1) {
-		fprintf(stderr, "Can't connect to server\n");
-		perror("connect");
-		exit(1);
-	}
+    //Connect to the server
+    if (connect (sd, (struct sockaddr *)&server, sizeof(server)) == -1) {
+        fprintf(stderr, "Can't connect to server\n");
+        perror("connect");
+        exit(1);
+    }
 
-	//Create our read thread that will read data on the socket
-	threadID = pthread_create(&thread, NULL, receiveThread, NULL);
+    //Create our read thread that will read data on the socket
+    threadID = pthread_create(&thread, NULL, receiveThread, NULL);
 
-	//Send a packet to the server stating we are a new user, which will be echo'd to all connected clients
-	sprintf(newuser, "%c%s%c%lu", NEWUSER, user, MESSAGEDELIMITER, icon);
-	send (sd, newuser, BUFLEN, 0);
+    //Send a packet to the server stating we are a new user, which will be echo'd to all connected clients
+    sprintf(newuser, "%c%s%c%lu", NEWUSER, user, MESSAGEDELIMITER, icon);
+    send (sd, newuser, BUFLEN, 0);
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -137,8 +151,8 @@ void connectToServer(char * serverIP, clientCodeCallback recvCallback, clientCod
 -- button. It takes the message string, stores it into a buffer along with the username * icon index for displaying
 -- purposes, and then writes that to the connected socket.
 ----------------------------------------------------------------------------------------------------------------------*/
-void sendMessage(const char * message) {
-	char sbuf[BUFLEN];
+void sendMessage(char * message) {
+    char sbuf[BUFLEN];
   //Format packet
   sprintf(sbuf, "%s%c%lu%c%s", username, MESSAGEDELIMITER, icon, MESSAGEDELIMITER, message);
   //Send formatted packet through the socket
@@ -165,18 +179,18 @@ void sendMessage(const char * message) {
 -- Reads the next packet from the server and returns it as a char * string
 ----------------------------------------------------------------------------------------------------------------------*/
 char * receiveMessage() {
-	char * bufPointer;
-	int bytesToRead = BUFLEN;
-	int bytesRead = 0;
+    char * bufPointer;
+    int bytesToRead = BUFLEN;
+    int bytesRead = 0;
 
-	bufPointer = rbuf;
+    bufPointer = rbuf;
 
-	while ((bytesRead = recv (sd, bufPointer, bytesToRead, 0)) < BUFLEN) {
-		bufPointer += bytesRead;
-		bytesToRead -= bytesRead;
-	}
+    while ((bytesRead = recv (sd, bufPointer, bytesToRead, 0)) < BUFLEN) {
+        bufPointer += bytesRead;
+        bytesToRead -= bytesRead;
+    }
 
-	return rbuf;
+    return rbuf;
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -200,8 +214,8 @@ char * receiveMessage() {
 -- the socket that is connected to the server.
 ----------------------------------------------------------------------------------------------------------------------*/
 void closeConnection() {
-	pthread_cancel(thread);
-	close (sd);
+    pthread_cancel(thread);
+    close (sd);
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -229,33 +243,75 @@ void closeConnection() {
 -- passed to the recvMessage callback.
 ----------------------------------------------------------------------------------------------------------------------*/
 void * receiveThread(void * ptr) {
-	char buf[BUFLEN], newbuf[BUFLEN];
-	while(1) {
-		//Hang waiting for a packet to be received
-		strcpy(buf, receiveMessage());
+    char buf[BUFLEN], newbuf[BUFLEN];
+    while(1) {
+        //Hang waiting for a packet to be received
+        strcpy(buf, receiveMessage());
 
-		//On successful receive and on valid packet, check what type of packet it is
-		if (strlen(buf) > 1) {
-			switch(buf[0]) {
-				//If it is a packet regarding a new user joining, pass it to the newUser callback
-				case NEWUSER:
-					//First, remove the NEWUSER control flag
-					memmove(newbuf, buf + 1, strlen(buf)-1);
-					newbuf[strlen(buf)-1] = '\0';
-					newUser(newbuf);
-					break;
-				//If it is a packet regarding a user leaving, pass it to the leftUser callback
-				case USERLEFT:
-					//First, remove the USERLEFT control flag
-					memmove(newbuf, buf + 1, strlen(buf)-1);
-					newbuf[strlen(buf)-1] = '\0';
-					leftUser(newbuf);
-					break;
-				//If no flag, it is a genuine chat message and is passed to the recvMessage callback as is
-				default:
-					recvMessage(buf);
-					break;
-			}
-		}
-	}
+        //On successful receive and on valid packet, check what type of packet it is
+        if (strlen(buf) > 1) {
+            switch(buf[0]) {
+                //If it is a packet regarding a new user joining, pass it to the newUser callback
+                case NEWUSER:
+                    //First, remove the NEWUSER control flag
+                    memmove(newbuf, buf + 1, strlen(buf)-1);
+                    newbuf[strlen(buf)-1] = '\0';
+                    newUser(newbuf);
+                    break;
+                //If it is a packet regarding a user leaving, pass it to the leftUser callback
+                case USERLEFT:
+                    //First, remove the USERLEFT control flag
+                    memmove(newbuf, buf + 1, strlen(buf)-1);
+                    newbuf[strlen(buf)-1] = '\0';
+                    leftUser(newbuf);
+                    break;
+                //If no flag, it is a genuine chat message and is passed to the recvMessage callback as is
+                default:
+                    recvMessage(buf);
+                    break;
+            }
+        }
+    }
+}
+
+//Callback for clientCode to invoke on new message read
+void newMessage(char * newpacket) {
+    QStringList packet = QString::fromUtf8(newpacket).split(MESSAGEDELIMITER);
+    if (packet.length() < 4) {
+        qDebug() << "Error in newMessage";
+        return;
+    }
+    QString ip = packet.at(0);
+    QString nickname = packet.at(1);
+    QString icon = packet.at(2);
+    QString message = packet.at(3);
+    QMetaObject::invokeMethod(((QObject*)app), "gotNewMessage", Q_ARG(QString, ip), Q_ARG(QString, nickname), Q_ARG(QString, icon), Q_ARG(QString, message));
+}
+
+//Callback for clientCode to invoke on user left
+void recvUserLeft(char * newpacket) {
+    QString ip = QString::fromUtf8(newpacket);
+    QMetaObject::invokeMethod(((QObject*)app), "gotLostUser", Q_ARG(QString, ip));
+}
+
+//Callback for clientCode to invoke on new user
+void recvNewUser(char * newpacket) {
+    QStringList packet = QString::fromUtf8(newpacket).split(MESSAGEDELIMITER);
+    if (packet.length() < 3) {
+        qDebug() << "Error in recv";
+        return;
+    }
+
+    QString nickname = packet.at(0);
+    QString icon = packet.at(1);
+    QString ip = packet.at(2);
+    QMetaObject::invokeMethod(((QObject*)app), "gotNewUser", Q_ARG(QString, ip), Q_ARG(QString, nickname), Q_ARG(QString, icon));
+}
+
+void connectToServerWrapper(char * serverIP, clientCodeCallback recvCallback, clientCodeCallback newClientCallback, clientCodeCallback leftClientCallback, char * user, int ico) {
+    connectToServer(serverIP, recvCallback, newClientCallback, leftClientCallback, user, ico);
+}
+
+void sendMessageWrapper(char * message) {
+    sendMessage(message);
 }
