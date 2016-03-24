@@ -272,9 +272,9 @@ Window {
 
                     TextEdit {
                         id: chatReplyEdit
+                        text: qsTr("")
                         width: chatReplyScrollFix.width
                         height: chatReplyScrollFix.height
-                        text: gApplicationController.usersOnline
                         font.family: "Arial"
                         cursorVisible: false
                         wrapMode: TextEdit.Wrap
@@ -364,7 +364,7 @@ Window {
                                id: userListEdit
                                width: userListScrollFix.width
                                height: userListScrollFix.height
-                               text: qsTr("")
+                               text: gApplicationController.usersOnline
                                font.family: "Arial"
                                cursorVisible: false
                                wrapMode: TextEdit.Wrap
@@ -581,7 +581,7 @@ Window {
                            }
                        }
                        onClicked : {
-                           //gApplicationController.disconnect()
+                           gApplicationController.disconnect()
                            buttonDisconnect.color0 = "#777"
                            buttonDisconnect.color1 = "#bbb"
                            buttonConnect.color0 = "#8ffdf9"

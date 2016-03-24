@@ -233,7 +233,7 @@ void AppController::gotLostUser(const QString &ip) {
 --
 -- PROGRAMMER: Carson Roscoe / Micah Willems
 --
--- INTERFACE: void AppController::gotLostUser()
+-- INTERFACE: void AppController::updateUsers(QString s)
 --
 -- RETURN: void
 --
@@ -241,6 +241,7 @@ void AppController::gotLostUser(const QString &ip) {
 -- Updates the UI of users after a user has been added or removed from our list of connected clients
 ----------------------------------------------------------------------------------------------------------------------*/
 void AppController::updateUsers(QString s) {
+    qDebug() << "Updating userlist";
     usersOnline = "";
     std::map<QString,QString>::iterator it;
     for (it=users.begin(); it!=users.end(); ++it)
@@ -248,15 +249,46 @@ void AppController::updateUsers(QString s) {
     usersOnlineChanged(usersOnline);
 }
 
-void AppController::setMsg(QString text) {
-    ushort code = 17;
-    QChar *dc1 = new QChar(code);
-    QRegExp rx(*dc1);
-    QStringList components = text.split(rx);
-    Message msg(components.at(0), components.at(1), components.at(2), components.at(3));
-    addMessage(msg);
+/*------------------------------------------------------------------------------------------------------------------
+-- METHOD: getUsers
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS:
+--
+-- DESIGNER: Micah Willems
+--
+-- PROGRAMMER: Micah Willems
+--
+-- INTERFACE: QString AppController::getUsers()
+--
+-- RETURN: QString
+--
+-- NOTES:
+-- This function is used by the UI thread to fetch the value of usersOnline
+----------------------------------------------------------------------------------------------------------------------*/
+QString AppController::getUsers() {
+    return usersOnline;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- METHOD: addMessage
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS:
+--
+-- DESIGNER: Micah Willems
+--
+-- PROGRAMMER: Micah Willems
+--
+-- INTERFACE: void AppController::addMessage(const Message &msg)
+--
+-- RETURN: void
+--
+-- NOTES:
+-- This function is an implementation of the QAbstractListModel class for adding content to the model contents
+----------------------------------------------------------------------------------------------------------------------*/
 void AppController::addMessage(const Message &msg)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());
@@ -264,11 +296,48 @@ void AppController::addMessage(const Message &msg)
   endInsertRows();
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- METHOD: rowCount
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS:
+--
+-- DESIGNER: Micah Willems
+--
+-- PROGRAMMER: Micah Willems
+--
+-- INTERFACE: int AppController::rowCount(const QModelIndex & parent) const
+--
+-- RETURN: int
+--
+-- NOTES:
+-- This function is an implementation of the QAbstractListModel class, used by the UI when accessing the model
+----------------------------------------------------------------------------------------------------------------------*/
 int AppController::rowCount(const QModelIndex & parent) const {
   Q_UNUSED(parent);
   return model.count();
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- METHOD: data
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS:
+--
+-- DESIGNER: Micah Willems
+--
+-- PROGRAMMER: Micah Willems
+--
+-- INTERFACE: QVariant AppController::data(const QModelIndex & index, int role) const
+--
+-- RETURN: QVariant
+--
+-- NOTES:
+-- This function is an implementation of the QAbstractListModel class, used by the UI when it pulls data from the model
+-- to display in the view
+----------------------------------------------------------------------------------------------------------------------*/
 QVariant AppController::data(const QModelIndex & index, int role) const {
   if (index.row() < 0 || index.row() >= model.count())
       return QVariant();
@@ -286,6 +355,24 @@ QVariant AppController::data(const QModelIndex & index, int role) const {
   return QVariant();
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- METHOD: roleNames
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS:
+--
+-- DESIGNER: Micah Willems
+--
+-- PROGRAMMER: Micah Willems
+--
+-- INTERFACE: QHash<int, QByteArray> AppController::roleNames() const
+--
+-- RETURN: void
+--
+-- NOTES:
+-- This function connects keywords in the view's content with values that can be accessed in the code here (Model)
+----------------------------------------------------------------------------------------------------------------------*/
 QHash<int, QByteArray> AppController::roleNames() const {
   QHash<int, QByteArray> roles;
   roles[IpRole] = "ipAddress";
@@ -295,16 +382,24 @@ QHash<int, QByteArray> AppController::roleNames() const {
   return roles;
 }
 
-void AppController::test() {
-    ushort code = 17;
-    QChar *dc1 = new QChar(code);
-    QString message;
-    message += "127.0.12.123";
-    message += *dc1;
-    message += "testuser1";
-    message += *dc1;
-    message += QString::number(0);
-    message += *dc1;
-    message += "This is a wicked-cool awesome message!!";
-    setMsg(message);
+/*------------------------------------------------------------------------------------------------------------------
+-- METHOD: disconnect
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS:
+--
+-- DESIGNER: Carson Roscoe
+--
+-- PROGRAMMER: Carson Roscoe
+--
+-- INTERFACE: void AppController::disconnect()
+--
+-- RETURN: void
+--
+-- NOTES:
+-- This function disconnects the client
+----------------------------------------------------------------------------------------------------------------------*/
+void AppController::disconnect() {
+    closeConnection();
 }

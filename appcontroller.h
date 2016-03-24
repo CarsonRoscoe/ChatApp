@@ -25,7 +25,7 @@
 --
 -- DESIGNER: Micah Willems
 --
--- PROGRAMMER: Micah Willems
+-- PROGRAMMER: Micah Willems / Carson Roscoe
 --
 -- METHODS: AppController(QQmlApplicationEngine *engine)
 --          Q_INVOKABLE QVariant getCursorPos()
@@ -45,7 +45,10 @@
 class AppController : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(QString usersOnline WRITE updateUsers NOTIFY usersOnlineChanged)
+
+    // Setting a Q_PROPERTY marks a variable for watching on the UI thread, via use of the NOTIFY function prototye
+    // and must be accessed using the READ and/or WRITE function prototypes
+    Q_PROPERTY(QString usersOnline READ getUsers WRITE updateUsers NOTIFY usersOnlineChanged)
 
 public:
     //Constructor which takes in the ApplicationEngine and assigns AppController to be the application controller of the engine
@@ -60,13 +63,12 @@ public:
         }
     }
 
+    // Functions implemented via the QAbstractListModel class
     void addMessage(const Message &msg);
-
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
-
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
 
-
+    // used to connect view keywords with c++ (model) variables
     enum Roles {
               IpRole = Qt::UserRole + 1,
               UsrRole,
@@ -93,11 +95,12 @@ public slots:
     void gotNewUser(const QString &username, const QString &ip, const QString &icon);
     //Callback invoked when a user is disconnected
     void gotLostUser(const QString &ip);
-    //Method that updates the text area of the screen
-    void setMsg(QString text);
     //Method that updates the list of all users in the UI
     void updateUsers(QString s);
-    void test();
+    //Method called by UI to fetch onlineuserlist
+    QString getUsers();
+    //Disconnect the client
+    void disconnect();
 signals:
     void usersOnlineChanged(QString usrs);
 private:
