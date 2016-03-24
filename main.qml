@@ -301,8 +301,8 @@ Window {
                     }
                     onReleased: {
                         sendButton.source = "images/window_controls/blue/button-blue.png"
-                        //gApplicationController.sendButtonClicked(chatReplyEdit.text)
-                        gApplicationController.test()
+                        gApplicationController.sendButtonClicked(chatReplyEdit.text)
+                        chatReplyEdit.text = ""
                     }
                 }
             }

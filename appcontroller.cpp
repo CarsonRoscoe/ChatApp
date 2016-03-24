@@ -158,7 +158,8 @@ void AppController::gotNewMessage(const QString &ip, const QString &nickname, co
         outfile << "[" << nickname.toStdString().c_str() << "/" << ip.toStdString().c_str() << " @ " << time << "] " << message.toStdString().c_str() << "\n";
     }
     //Someone said a new message.
-    setMsg(text);
+    Message msg(ip, nickname, icon, message);
+    addMessage(msg);
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -251,7 +252,6 @@ void AppController::setMsg(QString text) {
     QRegExp rx(*dc1);
     QStringList components = text.split(rx);
     Message msg(components.at(0), components.at(1), components.at(2), components.at(3));
-    qDebug() << msg.av();
     addMessage(msg);
 }
 
