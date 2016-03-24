@@ -65,8 +65,6 @@ int main(int argc, char *argv[])
     AppController appcontext(&engine, argc == 2 ? argv[1] : NULL);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     app.setWindowIcon(QIcon(":/images/misc/logonotext.ico"));
-    Message test("153.44.2.45", "testuser0", QString::number(1), "I hope this works");
-    appcontext.addMessage(test);
 
     return app.exec();
 }

@@ -187,7 +187,7 @@ void AppController::gotNewMessage(const QString &ip, const QString &nickname, co
 void AppController::gotNewUser(const QString &ip, const QString &nickname, const QString &icon) {
     qDebug() << "[NEWUSER] Nickname: " << nickname << ", Icon: " << icon << ", IP: " << ip;
     users[ip] = nickname;
-    updateUsers();
+    updateUsers(".");
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ void AppController::gotNewUser(const QString &ip, const QString &nickname, const
 void AppController::gotLostUser(const QString &ip) {
     qDebug() << "[USERLEFT] IP: " << ip;
     users.erase(ip);
-    updateUsers();
+    updateUsers(".");
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -236,14 +236,12 @@ void AppController::gotLostUser(const QString &ip) {
 -- NOTES:
 -- Updates the UI of users after a user has been added or removed from our list of connected clients
 ----------------------------------------------------------------------------------------------------------------------*/
-void AppController::updateUsers() {
-    //TODO: make it so when iterating through the list, qDebug() line is replaced with the "current online users" list.
-    //Basically,
-    //foreach user connected
-    //    append it to the UI
+void AppController::updateUsers(QString s) {
+    usersOnline = "";
     std::map<QString,QString>::iterator it;
     for (it=users.begin(); it!=users.end(); ++it)
-        qDebug() << it->first << " => " << it->second;
+        usersOnline += "[" + it->first + "] <b>" + it->second + "</b><br>";
+    usersOnlineChanged(usersOnline);
 }
 
 void AppController::setMsg(QString text) {
@@ -253,10 +251,6 @@ void AppController::setMsg(QString text) {
     QStringList components = text.split(rx);
     Message msg(components.at(0), components.at(1), components.at(2), components.at(3));
     addMessage(msg);
-}
-
-QString AppController::getMsg() const {
-    return output;
 }
 
 void AppController::addMessage(const Message &msg)

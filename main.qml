@@ -274,7 +274,7 @@ Window {
                         id: chatReplyEdit
                         width: chatReplyScrollFix.width
                         height: chatReplyScrollFix.height
-                        text: qsTr("")
+                        text: gApplicationController.usersOnline
                         font.family: "Arial"
                         cursorVisible: false
                         wrapMode: TextEdit.Wrap
@@ -336,6 +336,42 @@ Window {
                        height: 430
                        color: "#ffffff"
                        radius: 1
+                       Flickable {
+                           id: userListScrollFix
+                           width: 432
+                           height: 32
+                           anchors.left: parent.left
+                           anchors.leftMargin: 5
+                           anchors.top: parent.top
+                           anchors.topMargin: 5
+                           contentWidth: userListEdit.width
+                           contentHeight: userListEdit.height
+                           clip: true
+
+                           function ensureVisible(r)
+                           {
+                               if (contentX >= r.x)
+                                   contentX = r.x;
+                               else if (contentX+width <= r.x+r.width)
+                                   contentX = r.x+r.width-width;
+                               if (contentY >= r.y)
+                                   contentY = r.y;
+                               else if (contentY+height <= r.y+r.height)
+                                   contentY = r.y+r.height-height;
+                           }
+
+                           TextEdit {
+                               id: userListEdit
+                               width: userListScrollFix.width
+                               height: userListScrollFix.height
+                               text: qsTr("")
+                               font.family: "Arial"
+                               cursorVisible: false
+                               wrapMode: TextEdit.Wrap
+                               font.pixelSize: 12
+                               onCursorRectangleChanged: userListScrollFix.ensureVisible(cursorRectangle)
+                           }
+                       }
                    }
                }
            }

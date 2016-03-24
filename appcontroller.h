@@ -45,6 +45,7 @@
 class AppController : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(QString usersOnline WRITE updateUsers NOTIFY usersOnlineChanged)
 
 public:
     //Constructor which takes in the ApplicationEngine and assigns AppController to be the application controller of the engine
@@ -74,6 +75,8 @@ public:
           };
 
     QList<Message> model;
+    //String containing all the current users
+    QString usersOnline;
 
     //Returns the current cursor positions
     Q_INVOKABLE QVariant getCursorPos();
@@ -92,14 +95,12 @@ public slots:
     void gotLostUser(const QString &ip);
     //Method that updates the text area of the screen
     void setMsg(QString text);
-    //Method that returns the text area of the screen
-    QString getMsg() const;
     //Method that updates the list of all users in the UI
-    void updateUsers();
+    void updateUsers(QString s);
     void test();
+signals:
+    void usersOnlineChanged(QString usrs);
 private:
-    //String of the output
-    QString output;
     //Map of all clients connected where the key is their IP address and the value is their nickname
     std::map<QString, QString> users;
     //File stream
