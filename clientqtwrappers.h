@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QStringList>
 #include <QMetaObject>
+#include <ctime>
 
 //Callback for clientCode to invoke on new message read
 void newMessage(char * newmessage);

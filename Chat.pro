@@ -5,7 +5,8 @@ CONFIG += c++11
 
 SOURCES += main.cpp \
     appcontroller.cpp \
-    clientqtwrappers.cpp
+    clientqtwrappers.cpp \
+    message.cpp
 
 RESOURCES += qml.qrc
 
@@ -21,4 +22,5 @@ HEADERS += \
     appcontroller.h \
     clientCode.h \
     shared.h \
-    clientqtwrappers.h
+    clientqtwrappers.h \
+    message.h

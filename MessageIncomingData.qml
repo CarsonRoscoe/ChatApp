@@ -2,7 +2,7 @@ import QtQuick 2.5
 
 ListModel {
     ListElement {
-        ipAddress: gApplicationController
+        ipAddress: "34.3.34.234"
         imageSrc: "images/icons/1.png";
         userName: "AwesomeGuy"
         textContents: "Super awesome message!!"

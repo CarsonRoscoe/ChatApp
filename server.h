@@ -13,15 +13,17 @@
 #include <unistd.h>
 #include <errno.h>
 
+//Max number of clients connected
 #define MAXCLIENTS	5
-
+//String that, when printed, clears all ANSI terminals
 const char* CLEARSCREENANSI = "\e[1;1H\e[2J";
+//Array of IP addresses & usernames of the clients connected
 char addresses[MAXCLIENTS][IPLEN];
 char usernames[MAXCLIENTS][USERNAMELEN];
 
 // Function Prototypes
-void CriticalError(char * errorMessage);
 int main (int argc, char **argv);
+void CriticalError(char * errorMessage);
 void Refresh();
 void InitializeAddresses();
 void ClearUser(size_t i);
