@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QQmlContext>
 #include <QCursor>
+#include <map>
 #include "clientqtwrappers.h"
 
 
@@ -28,10 +29,12 @@ public slots:
     void gotLostUser(const QString &ip);
     void setText(QString text);
     QString getText() const;
+    void updateUsers();
 signals:
     void textChanged(QString);
 private:
     QString output;
+    std::map<QString, QString> users;
 };
 
 

@@ -6,18 +6,22 @@
 -- DATE: March 20th, 2016
 --
 -- REVISIONS: March 20th, 2016: Created
---						March 22nd, 2016: Added more functionality
---						March 23rd, 2016: Commented
+--            March 22nd, 2016: Added more functionality
+--            March 23rd, 2016: Commented
 --
 -- DESIGNER: Carson Roscoe
 --
 -- PROGRAMMER: Carson Roscoe
 --
 -- FUNCTIONS: void connectToServer(Server IP, callback, callback, callback, nickname, icon)
---					  void sendMessage(message to send)
---						char * receiveMessage()
---						void closeConnection()
---						void * receiveThread(void * ptr) (NOTE: Both return and param are unused)
+--            void sendMessage(message to send)
+--            char * receiveMessage()
+--            void closeConnection()
+--            void * receiveThread(void * ptr) (NOTE: Both return and param are unused)
+--            void newMessage(char * newpacket)
+--            void recvUserLeft(char * newpacket)
+--            void recvNewUser(char * newpacket)
+--            void disconnectButtonClicked()
 --
 -- NOTES:
 -- The client code was designed to be blackboxed out of all GUI logic. It was designed to be reusable in future
@@ -35,6 +39,7 @@
 
 #include "clientqtwrappers.h"
 
+////Variables below are the implementations of the externs////
 //Socket variables
 char rbuf[BUFLEN];
 char username[USERNAMELEN];
@@ -55,19 +60,19 @@ clientCodeCallback leftUser;
 -- DATE: March 20th, 2016
 --
 -- REVISIONS: March 20th, 2016: Created
---						March 22nd, 2016: Added more functionality
---						March 23rd, 2016: Commented
+--			  March 22nd, 2016: Added more functionality
+--			  March 23rd, 2016: Commented
 --
 -- DESIGNER: Carson Roscoe
 --
 -- PROGRAMMER: Carson Roscoe
 --
 -- INTERFACE: void connectToServer(Server's IP address
---																 Callback that is invoked when another user sends a message
---																 Callback that is invoked when someone new joins the chatroom
---																 Callback that is invoked when someone left the chatroom
---																 Username we want displayed to other users
---																 The index value of the icon we want displayed to other users)
+--			  Callback that is invoked when another user sends a message
+--			  Callback that is invoked when someone new joins the chatroom
+--			  Callback that is invoked when someone left the chatroom
+--		      Username we want displayed to other users
+--			  The index value of the icon we want displayed to other users)
 --
 -- RETURN: void
 --
@@ -136,7 +141,7 @@ void connectToServer(char * serverIP, clientCodeCallback recvCallback, clientCod
 -- DATE: March 20th, 2016
 --
 -- REVISIONS: March 20th, 2016: Created
---						March 23rd, 2016: Commented
+--			  March 23rd, 2016: Commented
 --
 -- DESIGNER: Carson Roscoe
 --
@@ -165,7 +170,7 @@ void sendMessage(char * message) {
 -- DATE: March 20th, 2016
 --
 -- REVISIONS: March 20th, 2016: Created
---						March 23rd, 2016: Commented
+--			  March 23rd, 2016: Commented
 --
 -- DESIGNER: Carson Roscoe
 --
@@ -199,7 +204,7 @@ char * receiveMessage() {
 -- DATE: March 20th, 2016
 --
 -- REVISIONS: March 20th, 2016: Created
---						March 23rd, 2016: Commented
+--			  March 23rd, 2016: Commented
 --
 -- DESIGNER: Carson Roscoe
 --
@@ -224,7 +229,7 @@ void closeConnection() {
 -- DATE: March 20th, 2016
 --
 -- REVISIONS: March 20th, 2016: Created
---						March 23rd, 2016: Commented
+--			  March 23rd, 2016: Commented
 --
 -- DESIGNER: Carson Roscoe
 --
@@ -242,7 +247,7 @@ void closeConnection() {
 -- a USERLEFT flag (DC3), it is passed over to the appropriate callback. If there is no flag, it is a raw message and
 -- passed to the recvMessage callback.
 ----------------------------------------------------------------------------------------------------------------------*/
-void * receiveThread(void * ptr) {
+void * receiveThread(void * unused) {
     char buf[BUFLEN], newbuf[BUFLEN];
     while(1) {
         //Hang waiting for a packet to be received
@@ -274,7 +279,28 @@ void * receiveThread(void * ptr) {
     }
 }
 
-//Callback for clientCode to invoke on new message read
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: newMessage
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS: March 20th, 2016: Created
+--			  March 23rd, 2016: Commented
+--
+-- DESIGNER: Carson Roscoe
+--
+-- PROGRAMMER: Carson Roscoe
+--
+-- INTERFACE: void newMessage(new packet read from server)
+--
+-- RETURN: void
+--
+-- NOTES:
+-- Whenever the posix reading thread reads a packet and deems the packet one of type message, it calls this function
+-- to update the UI accordingly. The function takes in a char * of the packet, converts it to a array of QString's
+-- and then seperates the contents of the packet by our delimiter character (DC1). Once the contents are layed out,
+-- we invoke a method on the main thread that will update the UI accordingly.
+----------------------------------------------------------------------------------------------------------------------*/
 void newMessage(char * newpacket) {
     QStringList packet = QString::fromUtf8(newpacket).split(MESSAGEDELIMITER);
     if (packet.length() < 4) {
@@ -288,13 +314,55 @@ void newMessage(char * newpacket) {
     QMetaObject::invokeMethod(((QObject*)app), "gotNewMessage", Q_ARG(QString, ip), Q_ARG(QString, nickname), Q_ARG(QString, icon), Q_ARG(QString, message));
 }
 
-//Callback for clientCode to invoke on user left
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: recvUserLeft
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS: March 20th, 2016: Created
+--			  March 23rd, 2016: Commented
+--
+-- DESIGNER: Carson Roscoe
+--
+-- PROGRAMMER: Carson Roscoe
+--
+-- INTERFACE: void recvUserLeft(new packet read from server)
+--
+-- RETURN: void
+--
+-- NOTES:
+-- Whenever the posix reading thread reads a packet and deems the packet one of type user left chat, it calls this function
+-- to update the UI accordingly. The function takes in a char * of the packet, converts it to a array of QString's
+-- and then seperates the contents of the packet by our delimiter character (DC1). Once the contents are layed out,
+-- we invoke a method on the main thread that will update the UI accordingly.
+----------------------------------------------------------------------------------------------------------------------*/
 void recvUserLeft(char * newpacket) {
     QString ip = QString::fromUtf8(newpacket);
     QMetaObject::invokeMethod(((QObject*)app), "gotLostUser", Q_ARG(QString, ip));
 }
 
-//Callback for clientCode to invoke on new user
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: recvUserLeft
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS: March 20th, 2016: Created
+--			  March 23rd, 2016: Commented
+--
+-- DESIGNER: Carson Roscoe
+--
+-- PROGRAMMER: Carson Roscoe
+--
+-- INTERFACE: void recvUserLeft(new packet read from server)
+--
+-- RETURN: void
+--
+-- NOTES:
+-- Whenever the posix reading thread reads a packet and deems the packet one of type user joined chat, it calls this function
+-- to update the UI accordingly. The function takes in a char * of the packet, converts it to a array of QString's
+-- and then seperates the contents of the packet by our delimiter character (DC1). Once the contents are layed out,
+-- we invoke a method on the main thread that will update the UI accordingly.
+----------------------------------------------------------------------------------------------------------------------*/
 void recvNewUser(char * newpacket) {
     QStringList packet = QString::fromUtf8(newpacket).split(MESSAGEDELIMITER);
     if (packet.length() < 3) {
@@ -308,14 +376,26 @@ void recvNewUser(char * newpacket) {
     QMetaObject::invokeMethod(((QObject*)app), "gotNewUser", Q_ARG(QString, ip), Q_ARG(QString, nickname), Q_ARG(QString, icon));
 }
 
-void connectToServerWrapper(char * serverIP, clientCodeCallback recvCallback, clientCodeCallback newClientCallback, clientCodeCallback leftClientCallback, char * user, int ico) {
-    connectToServer(serverIP, recvCallback, newClientCallback, leftClientCallback, user, ico);
-}
-
-void sendMessageWrapper(char * message) {
-    sendMessage(message);
-}
-
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: disconnectButtonClicked
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS: March 20th, 2016: Created
+--			  March 23rd, 2016: Commented
+--
+-- DESIGNER: Carson Roscoe
+--
+-- PROGRAMMER: Carson Roscoe
+--
+-- INTERFACE: void disconnectButtonClicked()
+--
+-- RETURN: void
+--
+-- NOTES:
+-- Invoked when the application clicks the disconnect buttons. Invokes closeConnection which kills the thread and closes
+-- the socket.
+----------------------------------------------------------------------------------------------------------------------*/
 void disconnectButtonClicked() {
     closeConnection();
 }

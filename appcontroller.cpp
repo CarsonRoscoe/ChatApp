@@ -12,7 +12,7 @@ QVariant AppController::getCursorPos()
 
 void AppController::connectButtonClicked(const QString &usrname, int picNum, const QString &IP) {
     app = (void*)this;
-    connectToServerWrapper(IP.toLatin1().data(),
+    connectToServer(IP.toLatin1().data(),
                     (clientCodeCallback)newMessage,
                     (clientCodeCallback)recvNewUser,
                     (clientCodeCallback)recvUserLeft,
@@ -22,12 +22,13 @@ void AppController::connectButtonClicked(const QString &usrname, int picNum, con
 }
 
 void AppController::sendButtonClicked(const QString &message) {
-    sendMessageWrapper(message.toLatin1().data());
+    sendMessage(message.toLatin1().data());
+    gotNewMessage("127.0.0.1", username, "" + icon, message);
     //Send
 }
 
 void AppController::gotNewMessage(const QString &ip, const QString &nickname, const QString &icon, const QString &message) {
-    QString text = "[" + nickname + "] " + message + "\n";
+    QString text = "[" + nickname + "] " + message + "<br>";
     qDebug() << "[MESSAGE] IP: " << ip << ", Nickname: " << nickname << ", Icon: " << icon << ", Message: " << message;
     //Someone said a new message.
     //SetText here
@@ -36,12 +37,20 @@ void AppController::gotNewMessage(const QString &ip, const QString &nickname, co
 
 void AppController::gotNewUser(const QString &ip, const QString &nickname, const QString &icon) {
     qDebug() << "[NEWUSER] Nickname: " << nickname << ", Icon: " << icon << ", IP: " << ip;
-    //New user connected
+    users[ip] = nickname;
+    updateUsers();
 }
 
 void AppController::gotLostUser(const QString &ip) {
     qDebug() << "[USERLEFT] IP: " << ip;
-    //User disconnected
+    users.erase(ip);
+    updateUsers();
+}
+
+void AppController::updateUsers() {
+    std::map<QString,QString>::iterator it;
+    for (it=users.begin(); it!=users.end(); ++it)
+        qDebug() << it->first << " => " << it->second;
 }
 
 void AppController::setText(QString text) {
