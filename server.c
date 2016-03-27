@@ -67,7 +67,7 @@ int main (int argc, char **argv) {
 	//Holds the different checks needed for select
   fd_set curSet, allSet;
 	//Temporary variables used when iterating through for loops
-	size_t i, j;
+	int i, j;
 	//Client socket length
 	socklen_t clientLength;
 
@@ -127,20 +127,23 @@ int main (int argc, char **argv) {
 	//Begin our forever loop listening for connections & data
 	while (1) {
    	curSet = allSet;
+		//Get the number of readible descriptors from select
 		numReadibleDescriptors = select(clientLatestSocket + 1, &curSet, NULL, NULL, NULL);
 
-		if (FD_ISSET(listeningSocketDescriptor, &curSet)) { //New client connection
+		//If a new client is connected
+		if (FD_ISSET(listeningSocketDescriptor, &curSet)) {
 			clientLength = sizeof(clientAddress);
+			//Accept the connection
 			if ((newSocketDescriptor = accept(listeningSocketDescriptor, (struct sockaddr *) &clientAddress, &clientLength)) == -1) {
 				CriticalError("accept error");
 			}
-
+			//Notify that client of all existing connections
 			for(j = 0; j <= currentNewestClient; j++) {
 				char newbuf[BUFLEN];
 				sprintf(newbuf, "%c%s%c%s", NEWUSER, usernames[j], MESSAGEDELIMITER, addresses[j]);
 				write(newSocketDescriptor, newbuf, BUFLEN);   // echo to client
 			}
-
+			//Assign our new clients index in the client array
       for (i = 0; i < FD_SETSIZE; i++) {
 				if (client[i] < 0) {
 					client[i] = newSocketDescriptor;	// save descriptor
@@ -148,42 +151,49 @@ int main (int argc, char **argv) {
         }
 			}
 
+			//If there are too many clients, exit, otherwise, store the address in our array for displaying it
 			if (i == FD_SETSIZE) {
 				printf ("Too many clients\n");
         exit(1);
 			} else {
 				strcpy(addresses[i], inet_ntoa(clientAddress.sin_addr));
 			}
-
-			FD_SET (newSocketDescriptor, &allSet);     // add new descriptor to set
+			//Add new descriptor to our set
+			FD_SET (newSocketDescriptor, &allSet);
 			if (newSocketDescriptor > clientLatestSocket)
-				clientLatestSocket = newSocketDescriptor;	// for select
+				clientLatestSocket = newSocketDescriptor;
 
+			//Set our new max index in the client array
 			if (i > currentNewestClient)
-				currentNewestClient = i;	// new max index in client[] array
+				currentNewestClient = i;
 
+			//Refresh the UI
 			Refresh();
 
+			//If there is no more readible descriptors, go back to select
 			if (--numReadibleDescriptors <= 0)
-				continue;	// no more readable descriptors
+				continue;
 		}
 
-		for (i = 0; i <= currentNewestClient; i++)	{ //Check all clients for data
+		//Check all clients for data
+		for (i = 0; i <= currentNewestClient; i++)	{
 			if ((curClientSocket = client[i]) < 0)
 				continue;
+			//If there is something to be read on our current client
 			if (FD_ISSET(curClientSocket, &curSet)) {
    			bufPointer = buf;
 				bytesToRead = BUFLEN;
+				//Read in the packet sent
 				while ((bytesRead = read(curClientSocket, bufPointer, bytesToRead)) > 0) {
 					bufPointer += bytesRead;
 					bytesToRead -= bytesRead;
 				}
 
+				//If the packet is empty then the user closed the socket. Notify everyone of the clients disconnection
 				if (strlen(buf) == 0 && bytesRead == 0) {
 					char newbuf[BUFLEN];
 
 					sprintf(newbuf, "%c%s%c", USERLEFT, inet_ntoa(clientAddress.sin_addr));
-					//printf("%s", newbuf);
 
 					for(j = 0; j <= currentNewestClient; j++) {
 						if (curClientSocket != client[j]) {
@@ -199,6 +209,7 @@ int main (int argc, char **argv) {
 					continue;
 				}
 
+				//If the packet starts with the new user flag, tell all clients of the new user
 				if (buf[0] == NEWUSER) {
 					char newbuf[BUFLEN];
 					char token = MESSAGEDELIMITER;
@@ -211,6 +222,7 @@ int main (int argc, char **argv) {
 					memmove(buf, buf + 1, strlen(buf));
 					strcpy(usernames[i], strtok(buf, &token));
 					Refresh();
+				//Otherwise, by default, this packet is deemed a message packet and is echo'd to all clients
 				} else {
 					char newbuf[BUFLEN];
 					sprintf(newbuf, "%s%c%s", inet_ntoa(clientAddress.sin_addr), MESSAGEDELIMITER, buf);
@@ -225,33 +237,110 @@ int main (int argc, char **argv) {
 				buf[0] = '\0';
 
 				if (--numReadibleDescriptors <= 0)
-        	break;        // no more readable descriptors
+        	break;
 			}
     }
   }
 	return(0);
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: InitializeAddresses
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS: March 20th, 2016: Created
+--			      March 23rd, 2016: Commented
+--
+-- DESIGNER: Carson Roscoe
+--
+-- PROGRAMMER: Carson Roscoe
+--
+-- INTERFACE: void InitializeAddresses()
+--
+-- RETURN: void
+--
+-- NOTES:
+-- Function that simply sets all the addresses in our address array to equal an empty string
+----------------------------------------------------------------------------------------------------------------------*/
 void InitializeAddresses() {
 	size_t i;
 	for(i = 0; i < MAXCLIENTS; i++)
 		strcpy(addresses[i], "");
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: Refresh
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS: March 20th, 2016: Created
+--            March 23rd, 2016: Commented
+--
+-- DESIGNER: Carson Roscoe
+--
+-- PROGRAMMER: Carson Roscoe
+--
+-- INTERFACE: void Refresh()
+--
+-- RETURN: void
+--
+-- NOTES:
+-- Function that clears the screen and displays all currently connected clients to the console
+----------------------------------------------------------------------------------------------------------------------*/
 void Refresh() {
 	size_t i;
 	printf("%s", CLEARSCREENANSI);
+	printf("###Connected Clients###\n");
 	for(i = 0; i < MAXCLIENTS; i++)
 		if (addresses[i][0] != '\0')
 			printf("Address: %s - Nickname: %s\n", addresses[i], usernames[i]);
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ClearUser
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS: March 20th, 2016: Created
+--            March 23rd, 2016: Commented
+--
+-- DESIGNER: Carson Roscoe
+--
+-- PROGRAMMER: Carson Roscoe
+--
+-- INTERFACE: void ClearUser(index of the user to clear from our arrays)
+--
+-- RETURN: void
+--
+-- NOTES:
+-- Function that clears a single users data from both the address array and the nickname array. Called when a user
+-- disconnects
+----------------------------------------------------------------------------------------------------------------------*/
 void ClearUser(size_t index) {
 	strcpy(addresses[index], "");
 	strcpy(usernames[index], "");
 }
 
-// Prints the error stored in errno and aborts the program.
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: CriticalError
+--
+-- DATE: March 20th, 2016
+--
+-- REVISIONS: March 20th, 2016: Created
+--            March 23rd, 2016: Commented
+--
+-- DESIGNER: Carson Roscoe
+--
+-- PROGRAMMER: Carson Roscoe
+--
+-- INTERFACE: void CriticalError(error message to be printed to standard error)
+--
+-- RETURN: void
+--
+-- NOTES:
+-- Function that displays an error message and then closes the program with an error code
+----------------------------------------------------------------------------------------------------------------------*/
 void CriticalError(char * errorMessage) {
     fprintf(stderr, errorMessage);
     exit(1);

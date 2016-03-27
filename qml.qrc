@@ -1,0 +1,67 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>MessageIncoming.qml</file>
+        <file>MessageIncomingData.qml</file>
+    </qresource>
+    <qresource prefix="/images/misc">
+        <file alias="logo.ico">images/misc/logo.ico</file>
+        <file alias="logonotext.ico">images/misc/logonotext.ico</file>
+    </qresource>
+    <qresource prefix="/images/window_controls/red">
+        <file alias="close.png">images/window_controls/red/close-window-16-red.png</file>
+        <file alias="restore.png">images/window_controls/red/restore-window-16-red.png</file>
+        <file alias="minimize.png">images/window_controls/red/minimize-window-16-red.png</file>
+        <file alias="maximize.png">images/window_controls/red/maximize-window-16-red.png</file>
+        <file alias="button-red.png">images/window_controls/red/button-red.png</file>
+        <file alias="button-red-pressed.png">images/window_controls/red/button-red-pressed.png</file>
+    </qresource>
+    <qresource prefix="/images/window_controls/blue">
+        <file alias="close.png">images/window_controls/blue/close-window-16-blue.png</file>
+        <file alias="restore.png">images/window_controls/blue/restore-window-16-blue.png</file>
+        <file alias="minimize.png">images/window_controls/blue/minimize-window-16-blue.png</file>
+        <file alias="maximize.png">images/window_controls/blue/maximize-window-16-blue.png</file>
+        <file alias="button-blue.png">images/window_controls/blue/button-blue.png</file>
+        <file alias="button-blue-pressed.png">images/window_controls/blue/button-blue-pressed.png</file>
+    </qresource>
+    <qresource prefix="/images/window_controls/grey">
+        <file alias="close.png">images/window_controls/grey/close-window-16-grey.png</file>
+        <file alias="restore.png">images/window_controls/grey/restore-window-16-grey.png</file>
+        <file alias="minimize.png">images/window_controls/grey/minimize-window-16-grey.png</file>
+        <file alias="maximize.png">images/window_controls/grey/maximize-window-16-grey.png</file>
+        <file alias="button-grey.png">images/window_controls/grey/button-grey.png</file>
+        <file alias="button-grey-pressed.png">images/window_controls/grey/button-grey-pressed.png</file>
+    </qresource>
+    <qresource prefix="/images/window_controls/magenta">
+        <file alias="close.png">images/window_controls/magenta/close-window-16-magenta.png</file>
+        <file alias="restore.png">images/window_controls/magenta/restore-window-16-magenta.png</file>
+        <file alias="minimize.png">images/window_controls/magenta/minimize-window-16-magenta.png</file>
+        <file alias="maximize.png">images/window_controls/magenta/maximize-window-16-magenta.png</file>
+        <file alias="button-magenta.png">images/window_controls/magenta/button-magenta.png</file>
+        <file alias="button-magenta-pressed.png">images/window_controls/magenta/button-magenta-pressed.png</file>
+    </qresource>
+    <qresource prefix="/images/icons">
+        <file alias="1.png">images/icons/1.png</file>
+        <file alias="2.png">images/icons/2.png</file>
+        <file alias="3.png">images/icons/3.png</file>
+        <file alias="4.png">images/icons/4.png</file>
+        <file alias="5.png">images/icons/5.png</file>
+        <file alias="6.png">images/icons/6.png</file>
+        <file alias="7.png">images/icons/7.png</file>
+        <file alias="8.png">images/icons/8.png</file>
+        <file alias="9.png">images/icons/9.png</file>
+        <file alias="10.png">images/icons/10.png</file>
+        <file alias="11.png">images/icons/11.png</file>
+        <file alias="12.png">images/icons/12.png</file>
+        <file alias="13.png">images/icons/13.png</file>
+        <file alias="14.png">images/icons/14.png</file>
+        <file alias="15.png">images/icons/15.png</file>
+        <file alias="16.png">images/icons/16.png</file>
+        <file alias="17.png">images/icons/17.png</file>
+        <file alias="18.png">images/icons/18.png</file>
+        <file alias="19.png">images/icons/19.png</file>
+        <file alias="20.png">images/icons/20.png</file>
+        <file alias="21.png">images/icons/21.png</file>
+        <file alias="0.png">images/icons/0.png</file>
+    </qresource>
+</RCC>

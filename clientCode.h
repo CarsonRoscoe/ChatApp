@@ -16,23 +16,23 @@
 #include <pthread.h>
 
 //Socket variables
-char rbuf[BUFLEN];
-char username[USERNAMELEN];
-int port, sd, icon;
+extern char rbuf[BUFLEN];
+extern char username[USERNAMELEN];
+extern int port, sd, icon;
 
 //Thread variables
-pthread_t thread;
-int threadID;
+extern pthread_t thread;
+extern int threadID;
 
 //Callback declerations
 typedef void (*clientCodeCallback)(char * message);
-clientCodeCallback recvMessage;
-clientCodeCallback newUser;
-clientCodeCallback leftUser;
+extern clientCodeCallback recvMessage;
+extern clientCodeCallback newUser;
+extern clientCodeCallback leftUser;
 
 //Function definitions
-void connectToServer(char * serverIP, clientCodeCallback callback, clientCodeCallback newuserCallback, clientCodeCallback leftUser, char * username, int icon);
-void sendMessage();
+void connectToServer(char * serverIP, clientCodeCallback recvCallback, clientCodeCallback newClientCallback, clientCodeCallback leftClientCallback, char * user, int ico) ;
+void sendMessage(char * message);
 char * receiveMessage();
 void closeConnection();
 void * receiveThread(void * ptr);
